@@ -161,11 +161,41 @@ async function teacher(){const code=prompt("Nhập mã giáo viên:");if(!code)r
  else try{rows=(await api('getTeacherDashboard',{code,lessonId:CONFIG.lessonId})).rows}catch(e){alert("Không tải được: "+e.message);return}
  T={rows,q:'',c:'',y:'',s:''};tview()}
 function tview(){const R=T.rows,f=R.filter(r=>(!T.q||r.name.toLowerCase().includes(T.q.toLowerCase()))&&(!T.c||r.cls===T.c)&&(!T.y||r.year===T.y)&&(!T.s||(T.s==='0'?!r.pct:T.s==='1'?r.pct>0&&r.pct<100:r.pct>=100))),avg=(a)=>a.length?(a.reduce((x,y)=>x+ +y,0)/a.length).toFixed(1):'–',op=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
- $('#app').innerHTML=`<header><b>👨‍🏫 Teacher Mode</b><button class="btn alt" onclick="T=null;login()">← Thoát</button></header><main><div class="stats"><div>👥 Tổng<br><b>${f.length}</b></div><div>▶ Đang học<br><b>${f.filter(r=>r.pct>0&&r.pct<100).length}</b></div><div>✅ Hoàn thành<br><b>${f.filter(r=>r.pct>=100).length}</b></div><div>📊 Điểm TB<br><b>${avg(f.filter(r=>r.score!=='').map(r=>r.score))}</b></div><div>⭐ Hiểu TB<br><b>${avg(f.filter(r=>r.u).map(r=>r.u))}</b></div></div>
+ $('#app').innerHTML=`<header><b>👨‍🏫 Teacher Mode</b><button class="btn alt" onclick="content(0)">📖 Xem nội dung bài học</button><button class="btn alt" onclick="T=null;login()">← Thoát</button></header><main><div class="stats"><div>👥 Tổng<br><b>${f.length}</b></div><div>▶ Đang học<br><b>${f.filter(r=>r.pct>0&&r.pct<100).length}</b></div><div>✅ Hoàn thành<br><b>${f.filter(r=>r.pct>=100).length}</b></div><div>📊 Điểm TB<br><b>${avg(f.filter(r=>r.score!=='').map(r=>r.score))}</b></div><div>⭐ Hiểu TB<br><b>${avg(f.filter(r=>r.u).map(r=>r.u))}</b></div></div>
  <input id="tq" placeholder="🔍 Tìm học sinh" value="${esc(T.q)}" style="padding:8px;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card)">
  <select id="tc"><option value="">Lọc lớp: tất cả</option>${op([...new Set(R.map(r=>r.cls))].sort(),T.c)}</select><select id="ty"><option value="">Năm học: tất cả</option>${op([...new Set(R.map(r=>r.year))].sort(),T.y)}</select>
  <select id="ts"><option value="">Tất cả trạng thái</option><option value="0" ${T.s==='0'?'selected':''}>Chưa bắt đầu</option><option value="1" ${T.s==='1'?'selected':''}>Đang học</option><option value="2" ${T.s==='2'?'selected':''}>Hoàn thành</option></select>
  <div class="tw"><table><tr><th>Họ tên</th><th>Mã</th><th>Lớp</th><th>Năm</th><th>%</th><th>Phần</th><th>HĐ xong</th><th>Điểm</th><th>Hiểu</th><th>Chưa hiểu</th><th>Cập nhật</th></tr>${f.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.sid)}</td><td>${esc(r.cls)}</td><td>${esc(r.year)}</td><td>${r.pct}%</td><td>${esc(r.sec)}</td><td>${r.doneN}</td><td>${esc(r.score)}</td><td>${esc(r.u)}</td><td>${esc(r.un)}</td><td>${esc(r.upd)}</td></tr>`).join('')}</table></div></main>`;
  $('#tq').oninput=e=>{T.q=e.target.value;const p=e.target.selectionStart;tview();$('#tq').focus();$('#tq').setSelectionRange(p,p)};$('#tc').onchange=e=>{T.c=e.target.value;tview()};$('#ty').onchange=e=>{T.y=e.target.value;tview()};$('#ts').onchange=e=>{T.s=e.target.value;tview()}}
+/* ================= XEM NỘI DUNG BÀI (Teacher) ================= */
+function contentItem(it){
+ if(it.t==='c'){
+  let h=`<div class="card"><p class="q">${it.q||''}</p>${it.pre||''}<div class="opts">${it.o.map((o,i)=>{
+    const isKey = it.k===-1 ? false : i===it.k;
+    return `<button class="opt${isKey?' sel':''}" disabled>${o}${isKey?' ✅':''}</button>`;
+  }).join('')}</div>`;
+  if(it.f){h+=`<div class="fb ok"><b>Phản hồi theo lựa chọn:</b><br>${it.f.map((t,i)=>`${it.o[i]}: ${t}`).join('<br>')}</div>`}
+  else{h+=`<div class="fb ok">Đúng: ${it.fb}</div><div class="fb">Chưa đúng: 💡 ${it.h}</div>`}
+  if(it.tail)h+=`<div class="fb"><small>${it.tail}</small></div>`;
+  if(it.sh)h+=`<div class="fb"><small>Lá chắn liên quan: ${it.sh}</small></div>`;
+  if(it.after)h+=`<div class="fb ok"><b>Câu dẫn dắt sau hoạt động:</b> ${it.after}</div>`;
+  if(it.why)h+=`<p><small>* Học sinh viết thêm 1–2 câu giải thích sau khi chọn.</small></p>`;
+  return h+'</div>';
+ }
+ if(it.t==='fix'){
+  return `<div class="card"><p class="q">🛠 Sửa một sản phẩm số chưa tốt</p><p>Các điểm có vấn đề học sinh cần tìm (5):</p>${FIX.map(t=>`<div class="hot f">${t}</div>`).join('')}<p>Các cách sửa đúng (chọn đủ 5):</p>${FIXES.map(t=>`<div class="hot f">✓ ${t}</div>`).join('')}</div>`;
+ }
+ if(it.t==='exit'){
+  return `<div class="card"><p class="q">🎟 Exit ticket – nội dung học sinh trả lời</p><ol><li>Em học được gì? (textarea)</li><li>Em chuẩn bị đăng một sản phẩm số có sử dụng ảnh hoặc thông tin của người khác. Trước khi đăng, em sẽ làm những gì? (textarea)</li><li>Mức độ hiểu bài: chọn 1–5 sao.</li><li>Điều em vẫn chưa hiểu (textarea).</li></ol><p class="q">🧠 Hướng dẫn vẽ sơ đồ tư duy ra giấy</p><ol><li>Chủ đề trung tâm: "ĐẠO ĐỨC &amp; VĂN HOÁ TRONG SỬ DỤNG CÔNG NGHỆ SỐ".</li><li>3–5 nhánh chính: biểu hiện vi phạm; cách tránh vi phạm; trung thực; sản phẩm số; sử dụng có trách nhiệm.</li><li>Mỗi nhánh dùng từ khoá ngắn, có nhánh con.</li><li>Thêm hình ảnh/icon.</li><li>Dùng màu phân biệt nhánh.</li></ol><p><small>Học sinh tự xác nhận đã hoàn thành, không nộp ảnh.</small></p></div>`;
+ }
+ return '';
+}
+function content(i){
+ const S=SECS[i];
+ let h=`<header><b>📖 Nội dung: ${esc(CONFIG.lessonName)}</b><button class="btn alt" onclick="tview()">← Bảng thống kê</button><button class="btn alt" onclick="T=null;login()">Thoát</button></header><main><nav>${SECS.map((s,k)=>`<button class="${k===i?'on':''}" onclick="content(${k})">Phần ${k+1}<small>${esc(s.n)} · ~${s.m}′</small></button>`).join('')}</nav><h2>${i+1}. ${esc(S.n)}</h2>${S.pre||''}`;
+ S.items.forEach(it=>h+=contentItem(it));
+ h+=`<p>${i>0?`<button class="btn alt" onclick="content(${i-1})">← Phần trước</button> `:''}${i<SECS.length-1?`<button class="btn" onclick="content(${i+1})">Phần sau →</button>`:''}</p></main>`;
+ $('#app').innerHTML=h;window.scrollTo(0,0);
+}
 badge();login();sync();
 </script></body></html>
