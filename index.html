@@ -1,1629 +1,216 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bài 9 · An toàn trên không gian mạng</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tin học 8 – Bài 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{
-  --navy-900:#0b1c33; --navy-800:#0f2440; --navy-700:#15325a;
-  --cyan:#22d3ee; --cyan-dark:#0891b2;
-  --safe:#22c55e; --safe-dark:#15803d;
-  --warn:#f5b73d; --warn-dark:#b5790a;
-  --danger:#ef4444; --danger-dark:#b91c1c;
-  --paper:#f3f6fb; --card:#ffffff; --ink:#0f2440; --ink-soft:#4a5b73;
-  --border:#dbe4f0;
-  --radius:14px;
-  --font-ui:'Be Vietnam Pro',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-  --font-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
-  box-sizing:border-box;
-}
-*,*::before,*::after{box-sizing:inherit}
-html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--font-ui);-webkit-tap-highlight-color:transparent}
-body{min-height:100%;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);line-height:1.5}
-img,svg{max-width:100%}
-button{font-family:inherit;cursor:pointer}
-h1,h2,h3,h4{font-family:var(--font-ui);margin:0 0 .5em;line-height:1.25}
-p{margin:0 0 1em}
-.hidden{display:none !important}
-.wrap{max-width:960px;margin:0 auto;padding:16px}
-.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--navy-900);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.topbar .brand{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
-.topbar .brand span.badge{background:var(--cyan);color:var(--navy-900);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
-.topbar .spacer{flex:1}
-.topbar .stat{font-size:13px;background:rgba(255,255,255,.08);border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:6px}
-.progressbar-outer{height:8px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;flex:1;min-width:120px}
-.progressbar-inner{height:100%;background:linear-gradient(90deg,var(--cyan),var(--safe));border-radius:99px;transition:width .4s ease}
-.btn{border:none;border-radius:10px;padding:12px 18px;font-weight:600;font-size:15px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s ease,box-shadow .12s ease}
-.btn:active{transform:scale(.97)}
-.btn:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
-.btn-primary{background:var(--navy-800);color:#fff}
-.btn-primary:hover{background:var(--navy-700)}
-.btn-cyan{background:var(--cyan);color:var(--navy-900)}
-.btn-outline{background:#fff;color:var(--navy-800);border:2px solid var(--border)}
-.btn-safe{background:var(--safe);color:#06280f}
-.btn-warn{background:var(--warn);color:#3a2600}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-block{width:100%}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-select,input[type=text],textarea{font-family:inherit;font-size:15px;padding:10px 12px;border-radius:10px;border:2px solid var(--border);min-height:44px;background:#fff;color:var(--ink);width:100%}
-textarea{min-height:88px;resize:vertical}
-select:focus-visible,input:focus-visible,textarea:focus-visible,.card:focus-visible,.choice:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
-label{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(15,36,64,.04)}
-.card h3{font-size:18px}
-.eyebrow{font-size:13px;color:var(--cyan-dark);font-weight:700;letter-spacing:.2px}
-.grid2{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr}}
-.grid3{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:720px){.grid3{grid-template-columns:1fr 1fr 1fr}}
-.choice{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 16px;font-size:15px;font-weight:500;min-height:44px;color:var(--ink)}
-.choice:hover{border-color:var(--cyan-dark)}
-.choice.selected{border-color:var(--cyan-dark);background:#eafcff}
-.choice.correct{border-color:var(--safe);background:#eafcf1}
-.choice.correct::after{content:" ✅";}
-.choice.incorrect{border-color:var(--danger);background:#fdeeee}
-.choice.incorrect::after{content:" 🔍";}
-.feedback{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:14px;font-weight:500}
-.feedback.ok{background:#eafcf1;color:var(--safe-dark);border:1px solid var(--safe)}
-.feedback.hint{background:#fff8e8;color:var(--warn-dark);border:1px solid var(--warn)}
-.pill{display:inline-flex;align-items:center;gap:6px;background:var(--navy-900);color:#fff;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
-.pill.safe{background:var(--safe)}
-.pill.warn{background:var(--warn);color:#3a2600}
-.pill.danger{background:var(--danger)}
-.zone{border:2px dashed var(--border);border-radius:12px;padding:12px;min-height:90px}
-.zone.active-target{border-color:var(--cyan-dark);background:#eafcff}
-.zone h4{margin:0 0 8px;font-size:14px}
-.tag{display:inline-flex;align-items:center;background:#fff;border:2px solid var(--border);border-radius:10px;padding:8px 12px;margin:4px;font-size:14px;font-weight:600}
-.tag.picked{outline:3px solid var(--cyan);outline-offset:1px}
-.tag.placed{opacity:.55}
-.msg-bubble{background:#eef3fa;border-radius:14px 14px 14px 2px;padding:12px 14px;margin:8px 0;max-width:85%;font-size:14.5px}
-.msg-bubble.link{border-left:4px solid var(--danger)}
-.chat-frame{background:#dfe9f5;border-radius:16px;padding:14px}
-.post-card{border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff}
-.post-meta{font-size:12px;color:var(--ink-soft);margin-bottom:6px}
-.checklist-item{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:14px}
-.progress-steps{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
-.progress-step{flex:1;min-width:36px;height:6px;border-radius:99px;background:var(--border)}
-.progress-step.done{background:var(--safe)}
-.progress-step.now{background:var(--cyan)}
-/* ---- Windows Security lab ---- */
-.wsec-window{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 8px 24px rgba(15,36,64,.12)}
-.wsec-titlebar{background:#0067b8;color:#fff;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px}
-.wsec-body{display:flex;flex-wrap:wrap}
-.wsec-nav{background:#f3f3f3;min-width:170px;flex:1 1 170px;padding:10px}
-.wsec-nav div{padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:4px;color:#333}
-.wsec-nav div.active{background:#e6f2fb;color:#0067b8;font-weight:700}
-.wsec-content{flex:3 1 320px;padding:16px;min-width:240px}
-.scan-progress-outer{height:14px;background:#eee;border-radius:99px;overflow:hidden;margin:10px 0}
-.scan-progress-inner{height:100%;background:#0067b8;width:0%;transition:width .3s linear}
-.scan-file-row{font-family:var(--font-mono);font-size:13px;padding:3px 0;color:#333}
-/* ---- malware sim ---- */
-.sim-track{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0;flex-wrap:wrap}
-.sim-node{width:78px;height:78px;border-radius:16px;background:#eef3fa;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;transition:all .3s ease}
-.sim-node.infected{background:#fdeeee;border-color:var(--danger)}
-.sim-arrow{font-size:22px;color:var(--ink-soft)}
-/* ---- exit ticket / mindmap ---- */
-.emoji-scale{display:flex;gap:8px;flex-wrap:wrap}
-.emoji-scale button{font-size:26px;background:#fff;border:2px solid var(--border);border-radius:12px;padding:8px 14px;min-height:44px}
-.emoji-scale button.selected{border-color:var(--cyan-dark);background:#eafcff}
-/* ---- modal ---- */
-.modal-overlay{position:fixed;inset:0;background:rgba(11,28,51,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100}
-.modal-box{background:#fff;border-radius:16px;padding:22px;max-width:520px;width:100%;max-height:88vh;overflow:auto}
-.modal-box.wide{max-width:960px}
-/* ---- toast / sync ---- */
-#syncBadge{position:fixed;bottom:14px;left:14px;background:var(--navy-900);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:60;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,.2)}
-/* ---- teacher table ---- */
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
-th{background:#f3f6fb;position:sticky;top:0}
-.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
-.stat-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
-.stat-card .num{font-size:24px;font-weight:800;color:var(--navy-800)}
-.stat-card .lbl{font-size:12.5px;color:var(--ink-soft)}
-.link-list a{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;color:var(--navy-800);text-decoration:none;font-size:14px;font-weight:600}
-.link-list a:hover{border-color:var(--cyan-dark);background:#eafcff}
-.xp-toast{position:fixed;top:70px;right:14px;background:var(--cyan);color:var(--navy-900);padding:10px 16px;border-radius:12px;font-weight:700;z-index:90;box-shadow:0 6px 18px rgba(0,0,0,.2);animation:xpIn .3s ease}
-@keyframes xpIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-@media (prefers-reduced-motion: reduce){*{animation-duration:.001s !important;transition-duration:.001s !important}}
-.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.slider-row label{flex:0 0 130px;margin:0;font-size:13.5px}
-.slider-row input[type=range]{flex:1}
-.slider-row .val{width:44px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
-footer.note{font-size:12.5px;color:var(--ink-soft);margin-top:8px}
-.small{font-size:13px;color:var(--ink-soft)}
-</style>
-</head>
-<body>
-
-<div class="topbar" role="banner">
-  <div class="brand">🛡️ <span id="lessonNameLabel">Bài 9</span> <span class="badge" id="demoBadge" style="display:none">DEMO MODE</span></div>
-  <div class="progressbar-outer" id="topProgressOuter" style="display:none"><div class="progressbar-inner" id="topProgressInner" style="width:0%"></div></div>
-  <div class="stat" id="xpStat" style="display:none">⭐ <span id="xpVal">0</span> XP</div>
-  <div class="spacer"></div>
-  <button class="btn btn-outline" id="teacherBtn" style="padding:8px 12px;font-size:13px;min-height:36px">👨‍🏫 Teacher Mode</button>
-</div>
-
-<div id="app" class="wrap"></div>
-<div id="syncBadge" class="hidden">☁ Đang chờ đồng bộ</div>
-
+:root{--ink:#10222f;--teal:#0e7c86;--amber:#f2a413;--bg:#eef3f5;--card:#fff;--bad:#c0392b;--ok:#1e8e5a;--mid:#a86b00;--line:#d5dee3}
+@media(prefers-color-scheme:dark){:root{--ink:#e8eff3;--bg:#0f1b24;--card:#182835;--line:#2c4252;--teal:#3fb6c1}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.55 'Be Vietnam Pro',system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+button,textarea,select,input{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:2px solid var(--teal);padding:8px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+header b{flex:1 1 220px}header .bar{flex:0 0 120px;height:8px;background:var(--line);border-radius:4px;overflow:hidden}header .bar i{display:block;height:100%;background:var(--teal)}
+.btn{border:1px solid var(--teal);background:var(--teal);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-weight:600}
+.btn.alt{background:transparent;color:var(--teal)}.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+main{max-width:940px;margin:0 auto;padding:16px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+nav button{flex:1 1 150px;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 10px;cursor:pointer}
+nav button.on{border-color:var(--teal);box-shadow:inset 0 -4px 0 var(--teal)}nav small{display:block;opacity:.7}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.q{font-weight:600;margin:0 0 10px}.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{flex:1 1 200px;border:2px solid var(--line);background:transparent;border-radius:10px;padding:10px;cursor:pointer;text-align:left}
+.opt:hover:not(:disabled){border-color:var(--teal)}.opt.sel{border-color:var(--teal);background:rgba(14,124,134,.12)}.opt:disabled{cursor:default}
+.fb{margin-top:12px;padding:10px 12px;border-left:5px solid var(--mid);background:rgba(242,164,19,.14);border-radius:6px}
+.fb.ok{border-color:var(--ok);background:rgba(30,142,90,.14)}.fb small{display:block;opacity:.8;margin-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:640px){.two{grid-template-columns:1fr}}
+.post{border:1px solid var(--line);border-radius:10px;padding:10px}.post h4{margin:0 0 6px}
+.img{background:linear-gradient(135deg,#7fb69e,#2f6f5e);color:#fff;border-radius:8px;padding:22px 8px;text-align:center;margin:6px 0}
+mark{background:var(--amber);color:#10222f;border-radius:3px;padding:0 3px}
+.prog{height:8px;background:var(--line);border-radius:4px;margin:6px 0 10px;overflow:hidden}.prog i{display:block;height:100%;background:var(--amber)}
+.chips span{display:inline-block;margin:3px;padding:5px 11px;border:1px solid var(--teal);border-radius:20px;font-size:14px}
+.hot{display:block;width:100%;text-align:left;margin:5px 0;padding:8px;border:2px dashed var(--line);background:transparent;border-radius:8px;cursor:pointer}
+.hot.f{border:2px solid var(--bad);background:rgba(192,57,43,.1)}
+textarea{width:100%;min-height:64px;margin-top:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:transparent}
+select{padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--card);width:100%;margin:6px 0 12px}
+.login{max-width:520px;margin:30px auto;text-align:center}.login h1{font-size:22px;margin:4px 0}
+.badge{position:fixed;right:8px;bottom:8px;background:var(--amber);color:#10222f;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;z-index:9}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}.tw{overflow-x:auto}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.stats div{flex:1 1 130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+.stars button{font-size:20px;border:0;background:transparent;cursor:pointer;opacity:.4}
+.pwrap{position:relative;max-width:280px;margin:8px auto}.pwrap input{width:100%;padding:9px 38px 9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.pwrap button{position:absolute;right:4px;top:4px;bottom:4px;border:0;background:transparent;cursor:pointer;font-size:16px;padding:0 8px}.stars button.on{opacity:1}
+label.ck{display:block;margin:4px 0}
+</style></head><body>
+<div id="app"></div><div class="badge" id="badge" hidden></div>
 <script>
-/* =========================================================
-   CONFIG
-========================================================= */
+/* ================= CONFIG ================= */
 const CONFIG = {
-  lessonId: "TIN10_BAI9",
-  lessonName: "Bài 9. An toàn trên không gian mạng",
-  subject: "Tin học",
-  grade: "10",
-  teacherName: "Huỳnh Văn Diễn",
-  schoolYear: "2026-2027",
-  expectedMinutes: 90,
-  fastFinishMinutes: 10,
-  teacherCode: "GV2026",
-  googleScriptUrl: "https://script.google.com/macros/s/AKfycbz4Y2UCvIybr-TKBkoc4UPeOXoU6xK7Y4iANu6cqScWdSr74qEa3wpKk5bePXeBcVet/exec"
+    teacherName: "HUỲNH VĂN DIỄN",
+    lessonId: "TIN8_BAI4",
+    lessonName: "Bài 4. Đạo đức và văn hoá trong sử dụng công nghệ kĩ thuật số",
+    schoolYear: "2026-2027",
+    teacherCode: "GV2026",
+    googleScriptUrl: "https://script.google.com/macros/s/AKfycbyDGIb41hEUovma4s_uJsag2vcnIC5EVVF7LMmmG4mkuGq3PPnNn5bh3dfK-qKZbXU/exec"
 };
-const DEMO_MODE = !CONFIG.googleScriptUrl || CONFIG.googleScriptUrl.indexOf("PASTE_") === 0;
-
-const DEMO_STUDENTS = [
-
-];
-
-document.getElementById('lessonNameLabel').textContent = CONFIG.lessonName.replace(/^Bài\s*\d+\.\s*/,'Bài '+CONFIG.lessonId.split('BAI')[1]+' · ');
-if(DEMO_MODE) document.getElementById('demoBadge').style.display='inline-block';
-
-/* =========================================================
-   STATE
-========================================================= */
-let S = {
-  studentId:null, hoTen:null, lop:null, studentKey:null,
-  page:'checkin',
-  startTime:null, lastActivity:null,
-  completedActivities:{}, // activityId -> {answer,correct,score,xp,attempts,time}
-  score:0, xp:0,
-  mindmap:{"Nguy cơ":[],"Malware":[],"Phòng tránh":[]},
-  exitTicket:null,
-  completeTime:null
-};
-
-const REQUIRED_ACTIVITIES = [
-  "B9_RISK_MESSAGE","B9_FAKE_NEWS","B9_PRIVACY_SORT",
-  "B9_CYBERBULLYING","B9_DATA_SAFE","B9_BALANCE",
-  "B9_VIRUS_SIM","B9_WORM_SIM","B9_TROJAN_SIM","B9_MALWARE_CLASSIFY",
-  "B9_SAFE_DOWNLOAD","B9_DEFENDER_SCAN",
-  "B9_FINAL_CHALLENGE","B9_EXIT_TICKET","B9_MINDMAP"
-];
-
-function storageKey(){ return "b9_progress_"+S.studentKey; }
-function saveLocal(){
-  try{ localStorage.setItem(storageKey(), JSON.stringify(S)); }catch(e){}
-}
-function loadLocal(key){
-  try{ const raw = localStorage.getItem("b9_progress_"+key); return raw?JSON.parse(raw):null; }catch(e){ return null; }
-}
-
-/* =========================================================
-   API LAYER (works for real Apps Script + offline queue)
-========================================================= */
-function apiGetUrl(params){
-  const qs = Object.keys(params).map(k=>encodeURIComponent(k)+'='+encodeURIComponent(params[k])).join('&');
-  return CONFIG.googleScriptUrl + '?' + qs;
-}
-async function apiGet(params){
-  if(DEMO_MODE) throw new Error('demo-mode');
-  const res = await fetch(apiGetUrl(params));
-  return await res.json();
-}
-function queueSync(action, payload){
-  let q = [];
-  try{ q = JSON.parse(localStorage.getItem('b9_syncQueue')||'[]'); }catch(e){ q=[]; }
-  const dedupeKey = action+'|'+(payload.studentKey||'')+'|'+(payload.activityId||'');
-  q = q.filter(it => (it.action+'|'+(it.payload.studentKey||'')+'|'+(it.payload.activityId||'')) !== dedupeKey);
-  q.push({id:Date.now()+'_'+Math.random().toString(36).slice(2), action, payload});
-  localStorage.setItem('b9_syncQueue', JSON.stringify(q));
-  updateSyncBadge();
-}
-function updateSyncBadge(){
-  let q = [];
-  try{ q = JSON.parse(localStorage.getItem('b9_syncQueue')||'[]'); }catch(e){}
-  const el = document.getElementById('syncBadge');
-  if(q.length>0){ el.classList.remove('hidden'); el.textContent = '☁ Đang chờ đồng bộ ('+q.length+')'; }
-  else{ el.classList.add('hidden'); }
-}
-async function apiPost(action, payload){
-  if(DEMO_MODE){ return {ok:true, demo:true}; }
-  try{
-    const res = await fetch(CONFIG.googleScriptUrl, {
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(Object.assign({action:action}, payload))
-    });
-    const data = await res.json();
-    if(!data || data.ok !== true) throw new Error('server-error');
-    return data;
-  }catch(err){
-    queueSync(action, payload);
-    return {ok:false, queued:true};
-  }
-}
-async function flushSyncQueue(){
-  if(DEMO_MODE) return;
-  let q = [];
-  try{ q = JSON.parse(localStorage.getItem('b9_syncQueue')||'[]'); }catch(e){ return; }
-  if(q.length===0) return;
-  const remaining = [];
-  for(const item of q){
-    try{
-      const res = await fetch(CONFIG.googleScriptUrl, {
-        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body: JSON.stringify(Object.assign({action:item.action}, item.payload))
-      });
-      const data = await res.json();
-      if(!data || data.ok !== true) remaining.push(item);
-      else showSyncedToast();
-    }catch(e){ remaining.push(item); }
-  }
-  localStorage.setItem('b9_syncQueue', JSON.stringify(remaining));
-  updateSyncBadge();
-}
-function showSyncedToast(){
-  const el = document.getElementById('syncBadge');
-  const old = el.textContent;
-  el.classList.remove('hidden'); el.textContent = '✅ Đã đồng bộ';
-  setTimeout(updateSyncBadge, 2000);
-}
-window.addEventListener('online', flushSyncQueue);
-setInterval(flushSyncQueue, 20000);
-
-/* =========================================================
-   XP TOAST + PROGRESS
-========================================================= */
-function xpToast(text){
-  const d = document.createElement('div');
-  d.className='xp-toast'; d.textContent = text;
-  document.body.appendChild(d);
-  setTimeout(()=>d.remove(), 1800);
-}
-function requiredDoneCount(){
-  return REQUIRED_ACTIVITIES.filter(a => S.completedActivities[a]).length;
-}
-function progressPercent(){
-  return Math.round(100*requiredDoneCount()/REQUIRED_ACTIVITIES.length);
-}
-function updateTopbar(){
-  const outer = document.getElementById('topProgressOuter');
-  const inner = document.getElementById('topProgressInner');
-  const xpStat = document.getElementById('xpStat');
-  if(S.studentId){
-    outer.style.display='block'; xpStat.style.display='flex';
-    inner.style.width = progressPercent()+'%';
-    document.getElementById('xpVal').textContent = S.xp;
-  }
-}
-function recordActivity(activityId, data){
-  const prev = S.completedActivities[activityId];
-  const attempts = Number.isFinite(data.attempts) ? data.attempts : ((prev?prev.attempts:0) + 1);
-
-  // Nếu cùng một Activity được ghi lại, thay thế điểm/XP cũ thay vì cộng lặp.
-  // Điều này giúp dữ liệu local khớp với RESPONSES (mỗi StudentKey + ActivityID chỉ có 1 dòng).
-  if(prev){
-    S.score = Math.max(0, S.score - (Number(prev.score)||0));
-    S.xp = Math.max(0, S.xp - (Number(prev.xp)||0));
-  }
-
-  S.completedActivities[activityId] = Object.assign({attempts, time:new Date().toISOString()}, data);
-  S.score += (Number(data.score)||0);
-  S.xp += (Number(data.xp)||0);
-  if(data.xp) xpToast('⭐ +'+data.xp+' XP');
-  S.lastActivity = new Date().toISOString();
-  saveLocal();
-  updateTopbar();
-  apiPost('submit', {
-    studentKey:S.studentKey, lessonId:CONFIG.lessonId, studentId:S.studentId,
-    activityId, answer: JSON.stringify(data.answer!==undefined?data.answer:null),
-    correct: !!data.correct, attempts, score:data.score||0, xp:data.xp||0,
-    timeSpent:data.timeSpent||0
-  });
-}
-
-/* =========================================================
-   ROUTER
-========================================================= */
-const app = document.getElementById('app');
-function go(page){
-  S.page = page; saveLocal();
-  render();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function render(){
-  if(S.page==='checkin') return renderCheckin();
-  if(S.page==='p1') return renderP1();
-  if(S.page==='p2') return renderP2();
-  if(S.page==='p3') return renderP3();
-  if(S.page==='p4') return renderP4();
-  if(S.page==='p5') return renderP5();
-  if(S.page==='complete') return renderComplete();
-}
-function pageNav(current){
-  const labels = [['p1','🕵️ Trang 1'],['p2','⚠️ Trang 2'],['p3','🦠 Trang 3'],['p4','🛡 Trang 4'],['p5','🏁 Trang 5']];
-  return '<div class="progress-steps" role="list" aria-label="Tiến trình bài học">' +
-    labels.map(([id,label])=>{
-      const idx = labels.findIndex(l=>l[0]===id);
-      const curIdx = labels.findIndex(l=>l[0]===current);
-      let cls = idx < curIdx ? 'done' : (idx===curIdx?'now':'');
-      return '<div class="progress-step '+cls+'" title="'+label+'"></div>';
-    }).join('') + '</div>';
-}
-
-/* =========================================================
-   CHECK-IN
-========================================================= */
-let ROSTER_CACHE = null;
-async function loadRoster(){
-  if(ROSTER_CACHE) return ROSTER_CACHE;
-  if(DEMO_MODE){ ROSTER_CACHE = DEMO_STUDENTS; return ROSTER_CACHE; }
-  try{
-    const data = await apiGet({action:'roster', schoolYear:CONFIG.schoolYear, lessonId:CONFIG.lessonId});
-    if(data && data.ok && Array.isArray(data.roster)){ ROSTER_CACHE = data.roster; return ROSTER_CACHE; }
-  }catch(e){}
-  ROSTER_CACHE = DEMO_STUDENTS;
-  return ROSTER_CACHE;
-}
-function renderCheckin(){
-  app.innerHTML = `
-  <div class="card" style="text-align:center;background:linear-gradient(180deg,#0f2440,#15325a);color:#fff">
-    <div class="eyebrow" style="color:#9fe8f6">TIN HỌC ${CONFIG.grade}</div>
-    <h1 style="font-size:26px">🛡️ ${CONFIG.lessonName}</h1>
-    <p style="color:#cfe0f5">Giáo viên: <strong>${CONFIG.teacherName}</strong> · Thời lượng: ${CONFIG.expectedMinutes} phút</p>
-  </div>
-  <div class="card">
-    <div class="eyebrow">BƯỚC 1</div>
-    <h3>Chọn lớp</h3>
-    <select id="selLop" aria-label="Chọn lớp"><option value="">— Chọn lớp —</option></select>
-  </div>
-  <div class="card hidden" id="cardTen">
-    <div class="eyebrow">BƯỚC 2</div>
-    <h3>Chọn họ và tên</h3>
-    <select id="selTen" aria-label="Chọn họ và tên"><option value="">— Chọn tên —</option></select>
-  </div>
-  <div class="card hidden" id="cardConfirm"></div>
-  `;
-  loadRoster().then(roster=>{
-    const classes = [...new Set(roster.map(r=>r.Lop||r.lop))].sort();
-    const selLop = document.getElementById('selLop');
-    classes.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; selLop.appendChild(o); });
-    selLop.addEventListener('change', ()=>{
-      const lop = selLop.value;
-      const cardTen = document.getElementById('cardTen');
-      const selTen = document.getElementById('selTen');
-      document.getElementById('cardConfirm').classList.add('hidden');
-      document.getElementById('cardConfirm').innerHTML='';
-      if(!lop){ cardTen.classList.add('hidden'); return; }
-      cardTen.classList.remove('hidden');
-      selTen.innerHTML = '<option value="">— Chọn tên —</option>';
-      roster.filter(r=>(r.Lop||r.lop)===lop).forEach(r=>{
-        const o=document.createElement('option'); o.value=r.StudentID||r.studentId; o.textContent=r.HoTen||r.hoTen; selTen.appendChild(o);
-      });
-    });
-    document.getElementById('selTen') || null;
-    selLop.parentElement.querySelector('#selLop');
-  });
-  app.addEventListener('change', function handler(e){
-    if(e.target && e.target.id==='selTen'){ onSelectStudent(); }
-  });
-}
-async function onSelectStudent(){
-  const selLop = document.getElementById('selLop');
-  const selTen = document.getElementById('selTen');
-  const lop = selLop.value, sid = selTen.value;
-  if(!sid) return;
-  const hoTen = selTen.options[selTen.selectedIndex].textContent;
-  const studentKey = `${CONFIG.lessonId}_${CONFIG.schoolYear}_${sid}`;
-  const local = loadLocal(studentKey);
-  const box = document.getElementById('cardConfirm');
-  box.classList.remove('hidden');
-  let welcomeBack = null;
-  if(local && local.completedActivities && Object.keys(local.completedActivities).length>0 && !local.completeTime){
-    welcomeBack = local;
-  } else if(!DEMO_MODE){
-    try{
-      const data = await apiGet({action:'loadProgress', lessonId:CONFIG.lessonId, studentId:sid, schoolYear:CONFIG.schoolYear});
-      if(data && data.ok && data.progress){ welcomeBack = data.progress; }
-    }catch(e){}
-  }
-  if(welcomeBack){
-    const pct = Math.round(100*(welcomeBack.completedActivities?Object.keys(welcomeBack.completedActivities).filter(a=>REQUIRED_ACTIVITIES.includes(a)).length:0)/REQUIRED_ACTIVITIES.length);
-    box.innerHTML = `
-      <p>👋 Chào mừng em quay lại!</p>
-      <p class="small">Tiến độ lần trước: <strong>${pct}%</strong></p>
-      <div class="pill">👤 ${hoTen}</div> <div class="pill">🏫 ${lop}</div>
-      <div style="margin-top:14px"><button class="btn btn-cyan btn-block" id="btnContinue">TIẾP TỤC ▶</button></div>
-    `;
-    document.getElementById('btnContinue').onclick = ()=>{
-      S = Object.assign(S, welcomeBack, {studentId:sid, hoTen, lop, studentKey});
-      if(!S.startTime) S.startTime = new Date().toISOString();
-      saveLocal(); go(S.page && S.page!=='checkin' ? S.page : 'p1');
-    };
+/* ================= NỘI DUNG ================= */
+const YN=["🚫 Có vấn đề","✅ Phù hợp","🤔 Cần xem thêm"],TAIL="Hỏi lại: Được phép chưa? Có tôn trọng người tạo nội dung không? Có ảnh hưởng người khác không? Nguồn có hợp lệ không?";
+const c2=(id,q,k,fb,h)=>({t:'c',id:'B4_P2_CASE_'+id,q,o:YN,k,fb,h,tail:TAIL});
+const c3=(id,q,o,sh,fb)=>({t:'c',id:'B4_P3_'+id,q,o,k:1,fb,h:"Hãy xem em đã tìm hiểu, có quyền sử dụng và tôn trọng bản quyền chưa.",sh});
+const qz=(n,q,k,fb)=>({t:'c',id:'B4_QUIZ_Q'+n,q,o:["Phù hợp","Không phù hợp / vi phạm"],k,fb,h:fb,quiz:1});
+const SECS=[
+{n:"Em sẽ chọn cách nào?",m:10,items:[{t:'c',id:'B4_P1_CASE_AN',why:1,k:-1,
+ q:"Khoa chia sẻ ảnh ruộng bậc thang cho An. An muốn đăng ảnh lên mạng xã hội. Em chọn cách nào?",
+ pre:`<div class="two"><div class="post"><h4>Cách 1</h4><div class="img">🏞 Ảnh của Khoa</div><p>An <mark>không hỏi ý kiến Khoa</mark>, chỉnh sửa ảnh, đăng lên và viết nội dung <mark>khiến người xem hiểu rằng An đã đến đó</mark>.</p></div><div class="post"><h4>Cách 2</h4><div class="img">🏞 Ảnh của Khoa</div><p>An <mark>xin phép Khoa</mark>, chỉnh sửa ảnh rồi đăng và <mark>ghi rõ người chụp</mark>.</p></div></div>`,
+ o:["Cách 1","Cách 2"],f:["💡 Khoa chưa đồng ý, ảnh không ghi người chụp và nội dung làm người xem hiểu sai.","✅ An đã xin phép, ghi rõ người chụp và không gây hiểu nhầm."],
+ after:"Khi sử dụng công nghệ số, điều gì có thể khiến một hành động trở nên chưa đúng?"}]},
+{n:"Thám tử hành vi số",m:20,items:[
+ c2('CINEMA',"Quay phim trong rạp chiếu phim.",0,"Đây là nơi không cho phép quay phim.","Hãy xem nơi đó có cho phép quay phim không."),
+ c2('PLACE',"Chụp ảnh ở nơi em chưa biết có được phép chụp hay không.",2,"Cần xem biển báo hoặc hỏi người quản lí trước khi chụp.","Chưa đủ thông tin để kết luận ngay; hãy kiểm tra xem có được phép không."),
+ c2('RECORD',"Ghi âm cuộc nói chuyện khi chưa được phép.",0,"Người nói chưa đồng ý cho ghi âm.","Hãy xem những người trong cuộc đã cho phép chưa."),
+ c2('RECORD_OK',"Ghi âm buổi thảo luận nhóm sau khi mọi người đồng ý.",1,"Mọi người đã cho phép nên phù hợp.","Ở đây mọi người đã đồng ý, thử xem lại tình huống."),
+ c2('COPY',"Sao chép thông tin trên website và coi là của mình.",0,"Nội dung là của người khác nhưng em nhận là của mình.","Hãy nghĩ đến người tạo ra nội dung đó."),
+ c2('CRACK',"Dùng phần mềm bẻ khoá.",0,"Em dùng phần mềm khi không có quyền sử dụng.","Hãy xem em có quyền sử dụng phần mềm đó không."),
+ c2('PERSONAL',"Đăng thông tin cá nhân của người khác khi chưa được phép.",0,"Thông tin của người khác cần được họ cho phép.","Hãy xem chủ thông tin đã đồng ý chưa."),
+ c2('VIOLENCE',"Chia sẻ hoặc livestream nội dung bạo lực.",0,"Nội dung bạo lực ảnh hưởng xấu đến người xem.","Hãy nghĩ đến tác động lên người khác."),
+ c2('COPYRIGHT',"Sử dụng tác phẩm số có bản quyền khi chưa được phép.",0,"Tác phẩm có bản quyền cần được phép của người sở hữu.","Hãy xem nguồn và quyền sử dụng có hợp lệ không.")]},
+{n:"Lá chắn công dân số",m:20,items:[
+ c3('SLIDE',"Em tìm thấy một bài trình chiếu hay trên Internet và muốn dùng.",["Tải về và ghi tên em","Kiểm tra nguồn, quyền sử dụng; xin phép hoặc ghi nguồn khi cần","Sửa vài chỗ rồi nộp như của em"],"©️ Bản quyền + 🔐 Quyền sử dụng","Nội dung trên Internet phần lớn có bản quyền, chỉ dùng khi được phép."),
+ c3('CRACK',"Bạn rủ em cài phần mềm bẻ khoá để khỏi phải mua.",["Cài luôn cho tiện","Không cài; chỉ dùng phần mềm khi có quyền sử dụng","Cài rồi không nói ai"],"🔐 Quyền sử dụng","Chỉ sử dụng sản phẩm số khi được phép hoặc có quyền."),
+ c3('MUSIC',"Em muốn lấy một bài hát trên mạng làm nhạc nền cho video của mình.",["Dùng luôn vì ai cũng nghe được","Nhớ rằng nội dung trên mạng thường có bản quyền, tìm hiểu quyền sử dụng trước","Cắt ngắn rồi dùng"],"©️ Bản quyền","Phần lớn nội dung trên Internet có bản quyền."),
+ c3('KNOW',"Em chưa chắc việc mình định đăng lên mạng có ổn không.",["Cứ đăng, có vấn đề thì xoá","Tìm hiểu thông tin, hỏi thầy cô trước khi đăng","Nhờ bạn đăng hộ"],"🧠 Hiểu biết","Tìm hiểu và trang bị kiến thức giúp tránh vi phạm.")]},
+{n:"Xưởng sản phẩm số trung thực",m:25,pre:`<div class="card chips"><p class="q">Các loại sản phẩm số</p><span>📢 Poster/quảng cáo</span><span>📷 Ảnh chụp/chỉnh sửa</span><span>📖 Truyện tự sáng tác</span><span>💬 Bài đăng mạng xã hội/diễn đàn</span><span>⭐ Bài giới thiệu/đánh giá</span><span>✍ Blog</span><span>🎙 Tệp ghi âm</span><span>🎥 Vlog</span><span>🎵 Video âm nhạc</span><span>🎮 Trò chơi tự thiết kế</span></div>`,items:[
+ {t:'fix',id:'B4_P4_PRODUCT_FIX'},
+ {t:'c',id:'B4_P4_CASE_VIOLENCE',why:1,q:"Bạn quay video hành vi bạo lực trong lớp rồi đăng lên mạng xã hội. Em khuyên bạn thế nào?",o:["Xoá video và không chia sẻ","Đăng thêm cho nhiều người biết","Không sao, cứ để đó"],k:0,fb:"Không quay, đăng nội dung bạo lực lên mạng.",h:"Hãy nghĩ đến người trong video và người xem."},
+ {t:'c',id:'B4_P4_CASE_PHOTO',why:1,q:"Một người dùng ảnh em chụp để tham gia cuộc thi mà chưa có sự đồng ý của em. Em nên làm gì?",o:["Liên hệ, yêu cầu họ dừng dùng khi chưa được em đồng ý","Bỏ qua","Lấy ảnh của họ đăng lại"],k:0,fb:"Ảnh do em chụp, người khác cần được em cho phép.",h:"Hãy xem người tạo ảnh đã đồng ý chưa."}]},
+{n:"Luyện tập + Exit ticket",m:15,items:[
+ qz(1,"Chia sẻ thông tin mua bán động vật hoang dã quý hiếm.",1,"Đây là hành động không phù hợp, vi phạm."),
+ qz(2,"Tạo trang cá nhân chia sẻ kinh nghiệm học tập.",0,"Phù hợp nếu nội dung trung thực và tôn trọng người khác."),
+ qz(3,"Quay và lan truyền video bạo lực học đường.",1,"Lan truyền bạo lực là không phù hợp."),
+ qz(4,"Sáng tác bài thơ về lớp và gửi bạn bè cùng đọc.",0,"Sản phẩm tự sáng tác, phù hợp."),
+ qz(5,"Tham gia cá cược bóng đá qua Internet.",1,"Đây là hành vi không phù hợp, vi phạm."),
+ qz(6,"Chia sẻ địa chỉ website chứa phim không có bản quyền sử dụng.",1,"Sử dụng nội dung khi chưa được phép là vi phạm bản quyền."),
+ {t:'exit',id:'B4_EXIT'}]}];
+const ITEMS=SECS.flatMap(s=>s.items),FIX=["📷 Ảnh không ghi nguồn (ảnh của người khác)","🗣 “Tôi vừa đến đây hôm qua!” (gây hiểu nhầm)","🔗 “Theo một trang không rõ nguồn…” (thông tin không đáng tin)","📋 Đoạn giới thiệu chép từ blog khác như của mình","👤 Đăng tên, số điện thoại của bạn khi chưa được phép"],
+ FIXES=["Ghi rõ nguồn/người tạo","Xin phép khi cần","Bỏ thông tin gây hiểu nhầm","Dùng nội dung tự tạo","Kiểm tra nội dung trước khi đăng"];
+/* ================= LƯU TRỮ ================= */
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DEMO=!CONFIG.googleScriptUrl,LS='T8B4:',KEY=id=>`${CONFIG.lessonId}_${CONFIG.schoolYear}_${id}`;
+const DEMO_ROSTER=[["HS001","Nguyễn An","8A1"],["HS002","Trần Bình","8A1"],["HS003","Lê Chi","8A1"],["HS004","Phạm Dũng","8A2"],["HS005","Võ Em","8A2"]].map(a=>({StudentID:a[0],name:a[1],cls:a[2],year:CONFIG.schoolYear}));
+let st=null,sec=0,roster=[],T=null;
+const lget=k=>{try{return JSON.parse(localStorage.getItem(LS+k))}catch(e){return null}},lset=(k,v)=>{try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}};
+const A=id=>st.ans[id],pct=()=>Math.round(ITEMS.filter(i=>A(i.id)&&A(i.id).d).length/ITEMS.length*100);
+const score=()=>{const q=ITEMS.filter(i=>i.quiz);return Math.round(q.reduce((s,i)=>s+((A(i.id)||{}).ok?1:0),0)/q.length*100)/10};
+let tmr;function save(id){st.upd=Date.now();st.act=id||st.act;st.sec=sec;st.pct=pct();st.score=score();st.done=st.pct===100;lset(st.key,st);const p=lget('PEND')||[];if(!p.includes(st.key)){p.push(st.key);lset('PEND',p)}clearTimeout(tmr);tmr=setTimeout(sync,600);badge()}
+async function api(a,d={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),12000);try{const r=await fetch(CONFIG.googleScriptUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:a,...d}),signal:c.signal});const j=await r.json();if(!j.ok)throw new Error(j.error);return j}finally{clearTimeout(t)}}
+async function sync(){if(DEMO)return;let p=lget('PEND')||[];for(const k of [...p]){const s=lget(k);if(!s){p=p.filter(x=>x!==k);continue}try{await api('saveProgress',{state:s});p=p.filter(x=>x!==k)}catch(e){break}}lset('PEND',p);badge()}
+function badge(){const b=$('#badge'),p=(lget('PEND')||[]).length;b.hidden=!DEMO&&!p;b.textContent=DEMO?'🟡 DEMO MODE':'⏳ Chờ đồng bộ'}
+addEventListener('online',sync);
+async function start(s){const k=KEY(s.StudentID);let loc=lget(k),cl=null;if(!DEMO){try{const r=await api('loadProgress',{key:k});cl=r.state}catch(e){}}
+ st=(cl&&(!loc||cl.upd>loc.upd))?cl:loc;if(!st)st={key:k,sid:s.StudentID,name:s.name,cls:s.cls,year:CONFIG.schoolYear,lesson:CONFIG.lessonId,start:Date.now(),upd:Date.now(),sec:0,act:'',pct:0,ans:{},exit:{ck:[]}};
+ sec=st.sec||0;lset(k,st);lset('LAST',{c:s.cls,i:s.StudentID});render()}
+function out(){if(st)save();st=null;login()}
+async function endSession(){save();if(!DEMO)await sync();alert("Tiến độ của em đã được lưu.\nLần sau em có thể tiếp tục từ đây.");out()}
+/* ================= ĐĂNG NHẬP ================= */
+async function login(){$('#app').innerHTML='<div class="login card"><p>Đang tải danh sách lớp…</p></div>';
+ try{roster=DEMO?DEMO_ROSTER:(await api('getRoster',{schoolYear:CONFIG.schoolYear})).roster;lset('ROSTER',roster)}catch(e){roster=lget('ROSTER')||[]}
+ const cls=[...new Set(roster.map(r=>r.cls))].sort(),last=lget('LAST')||{};
+ $('#app').innerHTML=`<div class="login card"><div style="font-size:40px">🛡</div><p>BÀI 4</p><h1>${esc(CONFIG.lessonName.replace(/^Bài 4\.\s*/,'').toUpperCase())}</h1><p>Giáo viên: <b>${esc(CONFIG.teacherName)}</b> · Năm học ${esc(CONFIG.schoolYear)}</p>
+ <label>Chọn lớp<select id="sc"><option value="">— Chọn lớp —</option>${cls.map(c=>`<option ${c===last.c?'selected':''}>${esc(c)}</option>`).join('')}</select></label>
+ <label>Chọn họ tên<select id="sn"></select></label><p id="pg"></p>
+ <button class="btn" id="go" disabled>Bắt đầu / Tiếp tục bài học</button> <button class="btn alt" onclick="teacher()">👨‍🏫 Teacher Mode</button></div>`;
+ const fill=()=>{const l=roster.filter(r=>r.cls===$('#sc').value).sort((a,b)=>a.name.split(' ').pop().localeCompare(b.name.split(' ').pop(),'vi')||a.name.localeCompare(b.name,'vi'));$('#sn').innerHTML='<option value="">— Chọn học sinh —</option>'+l.map(r=>`<option value="${esc(r.StudentID)}" ${r.StudentID===last.i?'selected':''}>${esc(r.name)}</option>`).join('');chk()},
+ chk=()=>{const v=$('#sn').value,s=lget(KEY(v));$('#go').disabled=!v;$('#go').textContent=s&&s.pct?'Tiếp tục từ hoạt động đang học':'Bắt đầu bài học';$('#pg').textContent=v&&s&&s.pct?`Chào ${s.name}. Em đã hoàn thành ${s.pct}% bài học.`:''};
+ $('#sc').onchange=fill;$('#sn').onchange=chk;fill();$('#go').onclick=()=>start(roster.find(r=>r.StudentID===$('#sn').value))}
+/* ================= GIAO DIỆN BÀI HỌC ================= */
+function render(){const S=SECS[sec];let h=`<header><b>${esc(CONFIG.lessonName)}</b><span>👤 ${esc(st.name)} · ${esc(st.cls)}</span><span>${pct()}%</span><div class="bar"><i style="width:${pct()}%"></i></div><button class="btn" onclick="endSession()">💾 Lưu &amp; kết thúc</button><button class="btn alt" onclick="out()">👤 Đổi học sinh</button></header><main><nav>${SECS.map((s,i)=>`<button class="${i===sec?'on':''}" onclick="go(${i})">Phần ${i+1}<small>${esc(s.n)} · ~${s.m}′</small></button>`).join('')}</nav><h2>${sec+1}. ${esc(S.n)}</h2>${S.pre||''}`;
+ const dn=S.items.filter(i=>A(i.id)&&A(i.id).d).length;if(S.items.length>2)h+=`<div>${Math.min(dn+1,S.items.length)}/${S.items.length}</div><div class="prog"><i style="width:${dn/S.items.length*100}%"></i></div>`;
+ for(const it of S.items){h+=it.t==='c'?choice(it):it.t==='fix'?fix(it):exit(it);if(!(A(it.id)&&A(it.id).d))break}
+ if(S.items.every(i=>A(i.id)&&A(i.id).d)&&S.items[0].quiz!==undefined)h+=`<div class="card"><b>Điểm quiz: ${score()}/10</b></div>`;
+ h+=`<p>${sec>0?'<button class="btn alt" onclick="go(sec-1)">← Phần trước</button> ':''}${sec<4?'<button class="btn" onclick="go(sec+1)">Phần sau →</button>':''}</p></main>`;$('#app').innerHTML=h;window.scrollTo(0,0)}
+function go(i){sec=i;save();render()}
+function choice(it){const a=A(it.id)||{},sel=a.c!==undefined;let h=`<div class="card"><p class="q">${it.q}</p>${it.pre||''}<div class="opts">${it.o.map((o,i)=>`<button class="opt ${a.c===i?'sel':''}" ${sel?'disabled':''} onclick="pick('${it.id}',${i})">${o}</button>`).join('')}</div>`;
+ if(sel&&it.why&&!a.d)h+=`<textarea id="why" placeholder="Vì sao em chọn như vậy? (1–2 câu)"></textarea><p><button class="btn" onclick="why('${it.id}')">Xem phản hồi</button></p>`;
+ if(a.d){const ok=a.c===it.k||it.k===-1&&a.c===1,t=it.f?it.f[a.c]:(a.c===it.k?'✅ '+it.fb:'💡 '+it.h+(it.quiz?'':' Gợi ý: '+it.fb.slice(0,0)));
+  h+=`<div class="fb ${ok?'ok':''}">${t}${it.sh?`<small>Lá chắn: ${it.sh}. ${it.fb}</small>`:''}${it.quiz&&!ok?'':''}${it.tail?`<small>${it.tail}</small>`:''}</div>`;
+  if(a.w)h+=`<p><i>Em viết: ${esc(a.w)}</i></p>`;if(it.after)h+=`<div class="fb ok"><b>${it.after}</b></div>`;
+  if(!ok&&!it.quiz&&it.k!==-1)h+=`<p><button class="btn alt" onclick="retry('${it.id}')">Chọn lại</button></p>`}
+ return h+'</div>'}
+function pick(id,i){const it=ITEMS.find(x=>x.id===id),a=st.ans[id]||(st.ans[id]={n:0});a.c=i;a.n++;a.ok=it.k===-1?null:i===it.k;a.s=a.ok?1:0;if(!it.why)a.d=1;save(id);render()}
+function why(id){const v=$('#why').value.trim();if(v.length<3){alert("Em hãy viết 1–2 câu giải thích nhé.");return}const a=A(id);a.w=v;a.d=1;save(id);render()}
+function retry(id){const a=A(id);a.c=undefined;a.d=0;save(id);render()}
+function fix(it){const a=st.ans[it.id]||(st.ans[it.id]={found:[],fx:[]}),f=a.found;let h=`<div class="card"><p class="q">🛠 Sửa một sản phẩm số chưa tốt</p><p>Bài đăng của một bạn. Bấm vào từng điểm có vấn đề (${f.length}/5).</p>`;
+ h+=FIX.map((t,i)=>`<button class="hot ${f.includes(i)?'f':''}" ${a.d?'disabled':''} onclick="found(${i})">${t}</button>`).join('');
+ if(f.length===5&&!a.d){h+=`<p class="q">Chọn cách sửa phù hợp:</p>`+FIXES.map((t,i)=>`<label class="ck"><input type="checkbox" ${a.fx.includes(i)?'checked':''} onchange="fixSel(${i},this.checked)"> ${t}</label>`).join('')+`<p><button class="btn" ${a.fx.length<5?'disabled':''} onclick="fixDone()">Sửa sản phẩm</button></p>`}
+ if(a.d)h+=`<div class="two"><div class="post"><h4>❌ BEFORE</h4>${FIX.map(x=>`<p>${x}</p>`).join('')}</div><div class="post"><h4>✅ AFTER</h4><p>📷 Ảnh có ghi rõ người chụp, đã xin phép</p><p>🗣 Nội dung đúng sự thật</p><p>🔗 Thông tin đã kiểm tra nguồn</p><p>✍ Nội dung tự viết</p><p>👤 Không đăng thông tin người khác khi chưa được phép</p></div></div>`;
+ return h+'</div>'}
+function found(i){const a=A('B4_P4_PRODUCT_FIX');if(!a.found.includes(i))a.found.push(i);save('B4_P4_PRODUCT_FIX');render()}
+function fixSel(i,v){const a=A('B4_P4_PRODUCT_FIX');a.fx=a.fx.filter(x=>x!==i);if(v)a.fx.push(i);save();render()}
+function fixDone(){A('B4_P4_PRODUCT_FIX').d=1;save('B4_P4_PRODUCT_FIX');render()}
+function exit(it){const e=st.exit,d=(A(it.id)||{}).d,u=e.u||0;
+ return `<div class="card"><p class="q">🎟 Exit ticket</p><label>1. Em học được gì?<textarea oninput="ex('l',this.value)">${esc(e.l)}</textarea></label>
+ <label>2. Em chuẩn bị đăng một sản phẩm số có sử dụng ảnh hoặc thông tin của người khác. Trước khi đăng, em sẽ làm những gì?<textarea oninput="ex('ap',this.value)">${esc(e.ap)}</textarea></label>
+ <p>3. Mức độ hiểu bài</p><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${n<=u?'on':''}" onclick="ex('u',${n});render()">⭐</button>`).join('')} ${u||''}</div>
+ <label>4. Điều em vẫn chưa hiểu<textarea oninput="ex('un',this.value)">${esc(e.un)}</textarea></label>
+ <p class="q">🧠 Vẽ sơ đồ tư duy Bài 4 ra giấy</p><ol><li>Viết/vẽ chủ đề trung tâm: “ĐẠO ĐỨC &amp; VĂN HOÁ TRONG SỬ DỤNG CÔNG NGHỆ SỐ”.</li><li>Tạo 3–5 nhánh chính, gợi ý: biểu hiện vi phạm; cách tránh vi phạm; trung thực; sản phẩm số; sử dụng có trách nhiệm.</li><li>Mỗi nhánh chỉ dùng từ khoá ngắn.</li><li>Thêm hình ảnh/icon đơn giản.</li><li>Dùng màu để phân biệt các nhánh.</li></ol>
+ ${["Có chủ đề trung tâm","Có 3–5 nhánh chính","Dùng từ khoá thay vì câu dài","Có nhánh con","Có hình ảnh/icon","Nội dung đúng bài học"].map((t,i)=>`<label class="ck"><input type="checkbox" ${e.ck[i]?'checked':''} onchange="st.exit.ck[${i}]=this.checked;save()"> ${t}</label>`).join('')}
+ <p><button class="btn ${e.mm?'':'alt'}" onclick="ex('mm',!st.exit.mm);render()">${e.mm?'✓ Em đã hoàn thành mindmap':'✓ Em đã hoàn thành mindmap'}</button></p>
+ ${d?'<div class="fb ok">Đã nộp Exit ticket. Cảm ơn em!</div>':'<p><button class="btn" onclick="submitExit()">Nộp Exit ticket</button></p>'}</div>`}
+function ex(k,v){st.exit[k]=v;clearTimeout(ex.t);ex.t=setTimeout(()=>save('B4_EXIT'),500)}
+async function submitExit(){const e=st.exit;if(!(e.l||'').trim()||!(e.ap||'').trim()||!e.u){alert("Em hãy trả lời câu 1, 2 và chọn mức độ hiểu bài.");return}e.sub=Date.now();st.ans.B4_EXIT={d:1};save('B4_EXIT');if(!DEMO)try{await api('submitExitTicket',{state:st})}catch(x){}render()}
+/* ================= TEACHER MODE ================= */
+function teacher(){
+ $('#app').innerHTML=`<div class="login card"><div style="font-size:34px">👨‍🏫</div><h1>Teacher Mode</h1><p>Nhập mã giáo viên để xem thống kê lớp học.</p>
+ <div class="pwrap"><input id="tcode" type="password" placeholder="Mã giáo viên" onkeydown="if(event.key==='Enter')teacherAuth()"><button type="button" aria-label="Hiện/ẩn mã" onclick="togglePw()">👁</button></div>
+ <p><button class="btn" onclick="teacherAuth()">Xác nhận</button> <button class="btn alt" onclick="login()">← Quay lại</button></p></div>`;
+ $('#tcode').focus()}
+function togglePw(){const i=$('#tcode');i.type=i.type==='password'?'text':'password'}
+async function teacherAuth(){const code=$('#tcode').value;if(!code)return;let rows;
+ if(DEMO){if(code!==CONFIG.teacherCode){alert("Sai mã.");return}rows=DEMO_ROSTER.map(r=>{const s=lget(KEY(r.StudentID))||{};return{name:r.name,sid:r.StudentID,cls:r.cls,year:r.year,pct:s.pct||0,sec:s.sec===undefined?'':SECS[s.sec].n,doneN:Object.values(s.ans||{}).filter(a=>a.d).length,score:s.score||'',u:(s.exit||{}).u||'',un:(s.exit||{}).un||'',upd:s.upd?new Date(s.upd).toLocaleString('vi'):''}})}
+ else try{rows=(await api('getTeacherDashboard',{code,lessonId:CONFIG.lessonId})).rows}catch(e){alert("Không tải được: "+e.message);return}
+ T={rows,q:'',c:'',y:'',s:'',showAns:false};tview()}
+function tview(){const R=T.rows,f=R.filter(r=>(!T.q||r.name.toLowerCase().includes(T.q.toLowerCase()))&&(!T.c||r.cls===T.c)&&(!T.y||r.year===T.y)&&(!T.s||(T.s==='0'?!r.pct:T.s==='1'?r.pct>0&&r.pct<100:r.pct>=100))),avg=(a)=>a.length?(a.reduce((x,y)=>x+ +y,0)/a.length).toFixed(1):'–',op=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+ $('#app').innerHTML=`<header><b>👨‍🏫 Teacher Mode</b><button class="btn alt" onclick="content(0)">📖 Xem nội dung bài học</button><button class="btn alt" onclick="T=null;login()">← Thoát</button></header><main><div class="stats"><div>👥 Tổng<br><b>${f.length}</b></div><div>▶ Đang học<br><b>${f.filter(r=>r.pct>0&&r.pct<100).length}</b></div><div>✅ Hoàn thành<br><b>${f.filter(r=>r.pct>=100).length}</b></div><div>📊 Điểm TB<br><b>${avg(f.filter(r=>r.score!=='').map(r=>r.score))}</b></div><div>⭐ Hiểu TB<br><b>${avg(f.filter(r=>r.u).map(r=>r.u))}</b></div></div>
+ <input id="tq" placeholder="🔍 Tìm học sinh" value="${esc(T.q)}" style="padding:8px;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card)">
+ <select id="tc"><option value="">Lọc lớp: tất cả</option>${op([...new Set(R.map(r=>r.cls))].sort(),T.c)}</select><select id="ty"><option value="">Năm học: tất cả</option>${op([...new Set(R.map(r=>r.year))].sort(),T.y)}</select>
+ <select id="ts"><option value="">Tất cả trạng thái</option><option value="0" ${T.s==='0'?'selected':''}>Chưa bắt đầu</option><option value="1" ${T.s==='1'?'selected':''}>Đang học</option><option value="2" ${T.s==='2'?'selected':''}>Hoàn thành</option></select>
+ <div class="tw"><table><tr><th>Họ tên</th><th>Mã</th><th>Lớp</th><th>Năm</th><th>%</th><th>Phần</th><th>HĐ xong</th><th>Điểm</th><th>Hiểu</th><th>Chưa hiểu</th><th>Cập nhật</th></tr>${f.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.sid)}</td><td>${esc(r.cls)}</td><td>${esc(r.year)}</td><td>${r.pct}%</td><td>${esc(r.sec)}</td><td>${r.doneN}</td><td>${esc(r.score)}</td><td>${esc(r.u)}</td><td>${esc(r.un)}</td><td>${esc(r.upd)}</td></tr>`).join('')}</table></div></main>`;
+ $('#tq').oninput=e=>{T.q=e.target.value;const p=e.target.selectionStart;tview();$('#tq').focus();$('#tq').setSelectionRange(p,p)};$('#tc').onchange=e=>{T.c=e.target.value;tview()};$('#ty').onchange=e=>{T.y=e.target.value;tview()};$('#ts').onchange=e=>{T.s=e.target.value;tview()}}
+/* ================= XEM NỘI DUNG BÀI (Teacher) ================= */
+function contentItem(it,showAns){
+ if(it.t==='c'){
+  let h=`<div class="card"><p class="q">${it.q||''}</p>${it.pre||''}<div class="opts">${it.o.map((o,i)=>{
+    const isKey = showAns && it.k!==-1 && i===it.k;
+    return `<button class="opt${isKey?' sel':''}" disabled>${o}${isKey?' ✅':''}</button>`;
+  }).join('')}</div>`;
+  if(showAns){
+   if(it.f){h+=`<div class="fb ok"><b>Phản hồi theo lựa chọn:</b><br>${it.f.map((t,i)=>`${it.o[i]}: ${t}`).join('<br>')}</div>`}
+   else{h+=`<div class="fb ok">Đúng: ${it.fb}</div><div class="fb">Chưa đúng: 💡 ${it.h}</div>`}
+   if(it.tail)h+=`<div class="fb"><small>${it.tail}</small></div>`;
+   if(it.sh)h+=`<div class="fb"><small>Lá chắn liên quan: ${it.sh}</small></div>`;
+   if(it.after)h+=`<div class="fb ok"><b>Câu dẫn dắt sau hoạt động:</b> ${it.after}</div>`;
   } else {
-    box.innerHTML = `
-      <div class="pill">👤 ${hoTen}</div> <div class="pill">🏫 ${lop}</div>
-      <div style="margin-top:14px"><button class="btn btn-primary btn-block" id="btnStart">BẮT ĐẦU NHIỆM VỤ 🛡️</button></div>
-    `;
-    document.getElementById('btnStart').onclick = ()=>{
-      S = {studentId:sid, hoTen, lop, studentKey, page:'p1', startTime:new Date().toISOString(), lastActivity:new Date().toISOString(),
-           completedActivities:{}, score:0, xp:0, mindmap:{"Nguy cơ":[],"Malware":[],"Phòng tránh":[]}, exitTicket:null, completeTime:null};
-      saveLocal();
-      apiPost('start', {studentKey, lessonId:CONFIG.lessonId, studentId:sid, hoTen, lop, schoolYear:CONFIG.schoolYear});
-      go('p1');
-    };
+   h+=`<p><small>🔒 Đáp án đang ẩn. Bật "Hiện đáp án" ở trên để xem.</small></p>`;
   }
+  if(it.why)h+=`<p><small>* Học sinh viết thêm 1–2 câu giải thích sau khi chọn.</small></p>`;
+  return h+'</div>';
+ }
+ if(it.t==='fix'){
+  let h=`<div class="card"><p class="q">🛠 Sửa một sản phẩm số chưa tốt</p><p>Các điểm có vấn đề học sinh cần tìm (5):</p>${FIX.map(t=>`<div class="hot f">${t}</div>`).join('')}`;
+  if(showAns)h+=`<p>Các cách sửa đúng (chọn đủ 5):</p>${FIXES.map(t=>`<div class="hot f">✓ ${t}</div>`).join('')}`;
+  else h+=`<p><small>🔒 Danh sách cách sửa đúng đang ẩn. Bật "Hiện đáp án" để xem.</small></p>`;
+  return h+'</div>';
+ }
+ if(it.t==='exit'){
+  return `<div class="card"><p class="q">🎟 Exit ticket – nội dung học sinh trả lời</p><ol><li>Em học được gì? (textarea)</li><li>Em chuẩn bị đăng một sản phẩm số có sử dụng ảnh hoặc thông tin của người khác. Trước khi đăng, em sẽ làm những gì? (textarea)</li><li>Mức độ hiểu bài: chọn 1–5 sao.</li><li>Điều em vẫn chưa hiểu (textarea).</li></ol><p class="q">🧠 Hướng dẫn vẽ sơ đồ tư duy ra giấy</p><ol><li>Chủ đề trung tâm: "ĐẠO ĐỨC &amp; VĂN HOÁ TRONG SỬ DỤNG CÔNG NGHỆ SỐ".</li><li>3–5 nhánh chính: biểu hiện vi phạm; cách tránh vi phạm; trung thực; sản phẩm số; sử dụng có trách nhiệm.</li><li>Mỗi nhánh dùng từ khoá ngắn, có nhánh con.</li><li>Thêm hình ảnh/icon.</li><li>Dùng màu phân biệt nhánh.</li></ol><p><small>Học sinh tự xác nhận đã hoàn thành, không nộp ảnh.</small></p></div>`;
+ }
+ return '';
 }
-
-/* =========================================================
-   TRANG 1 – THÁM TỬ KHÔNG GIAN MẠNG
-========================================================= */
-function renderP1(){
-  app.innerHTML = `
-  ${pageNav('p1')}
-  <div class="card">
-    <div class="eyebrow">TRANG 1 · ~15 PHÚT</div>
-    <h2>🕵️ Thám tử không gian mạng</h2>
-    <p>Em vừa trở thành thành viên của Đội An Toàn Số. Hãy xem các tình huống và phát hiện điều đáng ngờ.</p>
-  </div>
-  <div class="card" id="game1card"></div>
-  <div class="card" id="game2card"></div>
-  <div class="card" id="game3card"></div>
-  <div class="card" id="p1summary" style="display:none">
-    <h3>✅ Chốt lại 5 nguy cơ chính</h3>
-    <ul>
-      <li>Tin giả và thông tin không phù hợp</li>
-      <li>Lừa đảo trên mạng</li>
-      <li>Lộ thông tin cá nhân</li>
-      <li>Bắt nạt trên không gian mạng</li>
-      <li>Sử dụng Internet quá mức</li>
-    </ul>
-    <button class="btn btn-primary" onclick="go('p2')">Sang Trang 2 ▶</button>
-  </div>
-  `;
-  renderGame1();
-  renderGame2();
-  renderGame3();
-  checkP1Summary();
+function toggleAns(){T.showAns=!T.showAns;content(T.ci||0)}
+function content(i){
+ T.ci=i;const S=SECS[i],sa=!!T.showAns;
+ let h=`<header><b>📖 Nội dung: ${esc(CONFIG.lessonName)}</b><button class="btn ${sa?'':'alt'}" onclick="toggleAns()">${sa?'🔓 Đang hiện đáp án':'👁 Hiện đáp án'}</button><button class="btn alt" onclick="tview()">← Bảng thống kê</button><button class="btn alt" onclick="T=null;login()">Thoát</button></header><main><nav>${SECS.map((s,k)=>`<button class="${k===i?'on':''}" onclick="content(${k})">Phần ${k+1}<small>${esc(s.n)} · ~${s.m}′</small></button>`).join('')}</nav><h2>${i+1}. ${esc(S.n)}</h2>${S.pre||''}`;
+ S.items.forEach(it=>h+=contentItem(it,sa));
+ h+=`<p>${i>0?`<button class="btn alt" onclick="content(${i-1})">← Phần trước</button> `:''}${i<SECS.length-1?`<button class="btn" onclick="content(${i+1})">Phần sau →</button>`:''}</p></main>`;
+ $('#app').innerHTML=h;window.scrollTo(0,0);
 }
-function checkP1Summary(){
-  if(['B9_RISK_MESSAGE','B9_FAKE_NEWS','B9_PRIVACY_SORT'].every(a=>S.completedActivities[a])){
-    document.getElementById('p1summary').style.display='block';
-    if(!S.completedActivities['__badge_detective']){
-      S.completedActivities['__badge_detective']={done:true};
-      S.xp += 20; xpToast('🕵️ Thám tử số +20 XP'); saveLocal(); updateTopbar();
-    }
-  }
-}
-/* ---- Game 1: tình huống tin nhắn ---- */
-function renderGame1(){
-  const done = S.completedActivities['B9_RISK_MESSAGE'];
-  const el = document.getElementById('game1card');
-  el.innerHTML = `
-    <h3>💬 Game 1 — Tình huống tin nhắn</h3>
-    <div class="chat-frame">
-      <div class="msg-bubble link">⚠️ "Tài khoản của bạn sắp bị khóa! Bấm ngay vào đây để xác minh: example.invalid/verify"</div>
-    </div>
-    <p class="small">Em sẽ làm gì trước tiên?</p>
-    <div class="grid2" id="g1choices">
-      <button type="button" class="choice" data-c="link">🔗 Bấm liên kết</button>
-      <button type="button" class="choice" data-c="ignore">🗑 Bỏ qua</button>
-      <button type="button" class="choice" data-c="check">🔍 Kiểm tra nguồn</button>
-      <button type="button" class="choice" data-c="verify">☎ Xác minh bằng cách khác</button>
-    </div>
-    <div id="g1step2" class="hidden" style="margin-top:14px">
-      <p class="small">Dấu hiệu nào khiến em nghi ngờ? (chọn tất cả phù hợp)</p>
-      <div class="grid2" id="g1signs">
-        <button type="button" class="choice" data-s="urgent">Thúc giục / hù dọa</button>
-        <button type="button" class="choice" data-s="url">Đường dẫn lạ</button>
-        <button type="button" class="choice" data-s="info">Yêu cầu thông tin cá nhân</button>
-        <button type="button" class="choice" data-s="abnormal">Nội dung bất thường</button>
-      </div>
-      <button type="button" class="btn btn-primary" id="g1submit" style="margin-top:10px" disabled>Xác nhận</button>
-      <div id="g1inlineFeedback" class="small" style="margin-top:8px"></div>
-    </div>
-    <div id="g1feedback"></div>
-  `;
-
-  // Trạng thái đã hoàn thành: khóa hoạt động và hiển thị kết quả cũ.
-  if(done){
-    const savedChoice = done.answer && done.answer.choice;
-    const savedSigns = new Set((done.answer && done.answer.signs) || []);
-    el.querySelectorAll('.choice[data-c]').forEach(b=>{
-      if(b.dataset.c===savedChoice) b.classList.add(done.correct?'correct':'incorrect');
-      b.disabled=true;
-    });
-    document.getElementById('g1step2').classList.remove('hidden');
-    el.querySelectorAll('#g1signs .choice').forEach(b=>{
-      if(savedSigns.has(b.dataset.s)) b.classList.add('selected');
-      b.disabled=true;
-    });
-    const submitBtn = document.getElementById('g1submit');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Đã xác nhận ✅';
-    document.getElementById('g1feedback').innerHTML = feedbackHTML(done.correct,
-      done.correct ? '✅ Chính xác. Đây là một lựa chọn an toàn.' : 'Hoạt động đã được ghi nhận.');
-    return;
-  }
-
-  let chosenChoice = null;
-  let chosenSigns = new Set();
-  let attempts = 0;
-  let submitted = false;
-  const submitBtn = document.getElementById('g1submit');
-  const inlineFb = document.getElementById('g1inlineFeedback');
-
-  function refreshConfirm(){
-    // Chỉ cho xác nhận khi đã chọn cách xử lí và ít nhất một dấu hiệu.
-    submitBtn.disabled = submitted || !chosenChoice || chosenSigns.size===0;
-    if(!submitted){
-      inlineFb.textContent = !chosenChoice
-        ? 'Chọn cách xử lí trước.'
-        : (chosenSigns.size===0 ? 'Sau đó chọn ít nhất một dấu hiệu đáng ngờ.' : 'Sẵn sàng — bấm Xác nhận.');
-    }
-  }
-
-  el.querySelectorAll('#g1choices .choice').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      if(submitted) return;
-      el.querySelectorAll('#g1choices .choice').forEach(x=>x.classList.remove('selected','correct','incorrect'));
-      b.classList.add('selected');
-      chosenChoice = b.dataset.c;
-      document.getElementById('g1step2').classList.remove('hidden');
-      document.getElementById('g1feedback').innerHTML = '';
-      refreshConfirm();
-    });
-  });
-
-  el.querySelectorAll('#g1signs .choice').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      if(submitted) return;
-      b.classList.toggle('selected');
-      if(chosenSigns.has(b.dataset.s)) chosenSigns.delete(b.dataset.s);
-      else chosenSigns.add(b.dataset.s);
-      document.getElementById('g1feedback').innerHTML = '';
-      refreshConfirm();
-    });
-  });
-
-  submitBtn.addEventListener('click', ()=>{
-    if(submitted) return;
-    if(!chosenChoice || chosenSigns.size===0){
-      inlineFb.textContent = '💡 Em cần chọn cách xử lí và ít nhất một dấu hiệu trước khi xác nhận.';
-      refreshConfirm();
-      return;
-    }
-
-    attempts++;
-    const safe = (chosenChoice==='check' || chosenChoice==='verify');
-    const goodSigns = chosenSigns.has('urgent') && chosenSigns.has('url');
-    const correct = safe && goodSigns;
-    const feedback = document.getElementById('g1feedback');
-
-    if(!correct){
-      feedback.innerHTML = feedbackHTML(false,
-        '💡 Chưa chính xác. Em hãy kiểm tra lại cả <strong>cách xử lí</strong> và các dấu hiệu <strong>thúc giục/hù dọa</strong>, <strong>đường dẫn lạ</strong>. Em vẫn có thể sửa lựa chọn rồi thử lại.');
-      feedback.scrollIntoView({behavior:'smooth', block:'nearest'});
-      return;
-    }
-
-    submitted = true;
-    el.querySelectorAll('#g1choices .choice').forEach(b=>{
-      b.disabled=true;
-      b.classList.remove('selected');
-      if(b.dataset.c===chosenChoice) b.classList.add('correct');
-    });
-    el.querySelectorAll('#g1signs .choice').forEach(b=>b.disabled=true);
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Đã xác nhận ✅';
-    inlineFb.textContent = '';
-    feedback.innerHTML = feedbackHTML(true,
-      '✅ Chính xác. Kiểm tra nguồn hoặc xác minh bằng một kênh khác trước khi hành động là lựa chọn an toàn.');
-
-    recordActivity('B9_RISK_MESSAGE', {
-      answer:{choice:chosenChoice, signs:[...chosenSigns]},
-      correct:true,
-      attempts,
-      score:10,
-      xp:10
-    });
-    checkP1Summary();
-    feedback.scrollIntoView({behavior:'smooth', block:'nearest'});
-  });
-
-  refreshConfirm();
-}
-/* ---- Game 2: tin nào đáng tin ---- */
-const G2_POSTS = [
-  {id:1, title:"SỐC: Uống nước chanh nóng chữa khỏi mọi bệnh trong 1 ngày!", source:"trangtinabc.info", author:"Không ghi rõ", date:"Không ghi ngày", evidence:"Không có nguồn dẫn chứng", reliable:false},
-  {id:2, title:"Bộ Y tế công bố khuyến cáo phòng dịch mùa mưa", source:"moh.gov.vn (giả định)", author:"Phòng Truyền thông", date:"20/09/2026", evidence:"Trích văn bản chính thức", reliable:true},
-  {id:3, title:"Giật mình: Trường học gần nhà bạn sắp đóng cửa vĩnh viễn!!!", source:"tinnongmoingay.net", author:"admin", date:"Không ghi ngày", evidence:"Ảnh chụp màn hình không rõ nguồn", reliable:false}
-];
-function renderGame2(){
-  const done = S.completedActivities['B9_FAKE_NEWS'];
-  const el = document.getElementById('game2card');
-  el.innerHTML = `<h3>📰 Game 2 — Tin nào đáng tin?</h3><p class="small">Quan sát nguồn, tác giả, ngày đăng, bằng chứng rồi đánh giá từng bài đăng.</p>` +
-    G2_POSTS.map(p=>`
-      <div class="post-card" id="g2post${p.id}">
-        <div class="post-meta">Nguồn: ${p.source} · Tác giả: ${p.author} · Ngày: ${p.date}</div>
-        <div style="font-weight:700;margin-bottom:8px">${p.title}</div>
-        <button class="btn btn-outline" style="min-height:36px;padding:6px 12px;font-size:13px" data-check="${p.id}">🔍 KIỂM TRA NGUỒN</button>
-        <div class="grid2" style="margin-top:8px">
-          <button class="choice" data-vote="${p.id}" data-v="reliable">✅ Đáng tin</button>
-          <button class="choice" data-vote="${p.id}" data-v="fake">🚫 Không đáng tin</button>
-        </div>
-        <div class="feedback" id="g2fb${p.id}" style="display:none"></div>
-      </div>`).join('');
-  el.querySelectorAll('[data-check]').forEach(b=>{
-    b.onclick = ()=>{
-      const p = G2_POSTS.find(x=>x.id==b.dataset.check);
-      alert('Checklist kiểm chứng:\n• Nguồn: '+p.source+'\n• Tác giả: '+p.author+'\n• Ngày đăng: '+p.date+'\n• Bằng chứng: '+p.evidence+'\n• Tiêu đề giật gân? '+(/[!]{2,}|SỐC|Giật mình/i.test(p.title)?'Có':'Không')+'\n→ Hãy đối chiếu với ít nhất một nguồn khác trước khi tin.');
-    };
-  });
-  let votes = {};
-  const answers = (done && done.answer) || {};
-  el.querySelectorAll('[data-vote]').forEach(b=>{
-    const pid = b.dataset.vote;
-    if(done){
-      b.disabled = true;
-      if(answers[pid]===b.dataset.v){
-        const p = G2_POSTS.find(x=>x.id==pid);
-        const correct = (b.dataset.v==='reliable')===p.reliable;
-        b.classList.add(correct?'correct':'incorrect');
-      }
-      return;
-    }
-    b.onclick = ()=>{
-      const post = G2_POSTS.find(x=>x.id==pid);
-      const correct = (b.dataset.v==='reliable')===post.reliable;
-      votes[pid]=b.dataset.v;
-      el.querySelectorAll('[data-vote="'+pid+'"]').forEach(x=>{x.disabled=true;});
-      b.classList.add(correct?'correct':'incorrect');
-      const fb = document.getElementById('g2fb'+pid);
-      fb.style.display='block';
-      fb.className='feedback '+(correct?'ok':'hint');
-      fb.textContent = correct ? '✅ Chính xác — nguồn/tác giả/ngày đăng rõ ràng giúp em xác định độ tin cậy.' :
-        '🔍 Có một chi tiết đáng ngờ: '+ (post.reliable?'nguồn thực ra đáng tin, hãy kiểm tra kỹ hơn trước khi kết luận.':'nguồn không rõ tác giả/ngày đăng và tiêu đề giật gân — dấu hiệu tin giả.');
-      if(Object.keys(votes).length===G2_POSTS.length){
-        const correctCount = G2_POSTS.filter(p=>(votes[p.id]==='reliable')===p.reliable).length;
-        recordActivity('B9_FAKE_NEWS', {answer:votes, correct: correctCount>=2, score: correctCount*4, xp: correctCount*3});
-        checkP1Summary();
-      }
-    };
-  });
-}
-/* ---- Game 3: thông tin nào nên chia sẻ ---- */
-const G3_ITEMS = [
-  {id:'name', label:'Tên', correct:'green'},
-  {id:'hobby', label:'Sở thích', correct:'green'},
-  {id:'pass', label:'Mật khẩu', correct:'red'},
-  {id:'addr', label:'Địa chỉ nhà', correct:'red'},
-  {id:'ticket', label:'Ảnh vé máy bay có mã đặt chỗ', correct:'red'},
-  {id:'bank', label:'Số tài khoản', correct:'red'},
-  {id:'food', label:'Ảnh món ăn', correct:'green'},
-  {id:'aloneloc', label:'Vị trí đang ở một mình', correct:'red'},
-  {id:'pet', label:'Tên thú cưng', correct:'yellow'},
-  {id:'otp', label:'Mã OTP', correct:'red'}
-];
-const G3_EXPLAIN = {
-  green:'thường an toàn để chia sẻ trong bối cảnh phù hợp.',
-  yellow:'cần cân nhắc — có thể bị lợi dụng để đoán mật khẩu hoặc câu hỏi bảo mật.',
-  red:'không nên công khai vì có thể gây hại trực tiếp nếu lộ ra.'
-};
-function renderGame3(){
-  const done = S.completedActivities['B9_PRIVACY_SORT'];
-  const el = document.getElementById('game3card');
-  const placed = (done && done.answer) || {};
-  el.innerHTML = `
-    <h3>🗂️ Game 3 — Thông tin nào nên chia sẻ?</h3>
-    <p class="small">Chọn một thẻ rồi bấm vào vùng phù hợp để phân loại.</p>
-    <div id="g3tags">${G3_ITEMS.map(it=> (placed[it.id]?'':`<button class="tag" data-tag="${it.id}">${it.label}</button>`)).join('')}</div>
-    <div class="grid3" style="margin-top:12px">
-      <div class="zone" data-zone="green"><h4>🟢 Có thể chia sẻ trong bối cảnh phù hợp</h4><div id="zone-green"></div></div>
-      <div class="zone" data-zone="yellow"><h4>🟡 Cần cân nhắc</h4><div id="zone-yellow"></div></div>
-      <div class="zone" data-zone="red"><h4>🔴 Không nên công khai</h4><div id="zone-red"></div></div>
-    </div>
-    <div id="g3feedback"></div>
-  `;
-  Object.keys(placed).forEach(id=>{
-    const it = G3_ITEMS.find(x=>x.id===id);
-    const zoneDiv = document.getElementById('zone-'+placed[id]);
-    if(zoneDiv) zoneDiv.innerHTML += `<span class="tag placed">${it.label}</span>`;
-  });
-  if(done){ return; }
-  let picked = null;
-  let correctCount = 0, totalPlaced = 0;
-  function refreshPick(){
-    el.querySelectorAll('#g3tags .tag').forEach(t=>t.classList.toggle('picked', t.dataset.tag===picked));
-  }
-  el.querySelectorAll('#g3tags .tag').forEach(t=>{
-    t.onclick = ()=>{ picked = t.dataset.tag; refreshPick(); };
-  });
-  el.querySelectorAll('.zone').forEach(z=>{
-    z.addEventListener('click', ()=>{
-      if(!picked) return;
-      const it = G3_ITEMS.find(x=>x.id===picked);
-      const zoneKey = z.dataset.zone;
-      const correct = it.correct===zoneKey;
-      const tagEl = el.querySelector('#g3tags .tag[data-tag="'+picked+'"]');
-      if(tagEl) tagEl.remove();
-      document.getElementById('zone-'+zoneKey).innerHTML += `<span class="tag placed">${it.label} ${correct?'✅':'🔁'}</span>`;
-      const fb = document.getElementById('g3feedback');
-      fb.className='feedback '+(correct?'ok':'hint');
-      fb.style.display='block';
-      fb.textContent = correct ? `✅ Đúng — "${it.label}" ${G3_EXPLAIN[it.correct]}` : `💡 "${it.label}" thật ra ${G3_EXPLAIN[it.correct]}`;
-      totalPlaced++; if(correct) correctCount++;
-      placed[picked]=zoneKey; picked=null;
-      if(totalPlaced===G3_ITEMS.length){
-        recordActivity('B9_PRIVACY_SORT', {answer:placed, correct: correctCount>=7, score: correctCount*3, xp: 15});
-        checkP1Summary();
-      }
-    });
-  });
-}
-function feedbackHTML(ok, text){
-  return `<div class="feedback ${ok?'ok':'hint'}">${text}</div>`;
-}
-
-/* =========================================================
-   TRANG 2 – KHI GẶP RẮC RỐI TRÊN MẠNG
-========================================================= */
-function renderP2(){
-  app.innerHTML = `
-  ${pageNav('p2')}
-  <div class="card">
-    <div class="eyebrow">TRANG 2 · ~18 PHÚT</div>
-    <h2>⚠️ Khi gặp rắc rối trên mạng</h2>
-    <p>Lừa đảo, lộ dữ liệu, bắt nạt trên mạng và việc dùng Internet quá mức — em sẽ xử lý thế nào?</p>
-  </div>
-  <div class="card" id="act1card"></div>
-  <div class="card" id="act2card"></div>
-  <div class="card" id="act3card"></div>
-  <div class="card" id="p2next" style="display:none">
-    <button class="btn btn-outline" onclick="go('p1')" style="margin-right:8px">◀ Trang 1</button>
-    <button class="btn btn-primary" onclick="go('p3')">Sang Trang 3 ▶</button>
-  </div>
-  `;
-  renderCyberbullying();
-  renderDataSafe();
-  renderBalance();
-  checkP2Next();
-}
-function checkP2Next(){
-  if(['B9_CYBERBULLYING','B9_DATA_SAFE','B9_BALANCE'].every(a=>S.completedActivities[a])) document.getElementById('p2next').style.display='block';
-}
-/* ---- Hoạt động 1: cyberbullying decision path ---- */
-const CB_STEPS = [
-  {q:"Một tài khoản liên tục đăng lời xúc phạm em trong nhóm lớp. Em làm gì trước tiên?",
-   options:[{k:'A',t:'Tranh cãi lại ngay', ok:false, out:'Tranh cãi thường khiến tình huống căng thẳng hơn.'},
-            {k:'B',t:'Lưu bằng chứng', ok:true, out:'Đúng hướng — lưu bằng chứng là bước quan trọng đầu tiên.'},
-            {k:'C',t:'Xóa toàn bộ bằng chứng', ok:false, out:'Xóa bằng chứng sẽ khiến em khó nhờ hỗ trợ sau này.'}]},
-  {q:"Sau khi đã lưu bằng chứng, bước tiếp theo nên là gì?",
-   options:[{k:'D',t:'Chia sẻ với người lớn đáng tin cậy', ok:true, out:'Chính xác — chia sẻ với cha mẹ/thầy cô giúp em được hỗ trợ đúng cách.'},
-            {k:'A2',t:'Tiếp tục tranh cãi kéo dài trên mạng', ok:false, out:'Đối đầu kéo dài không giúp giải quyết vấn đề.'}]},
-  {q:"Nếu tài khoản đó vẫn tiếp tục, em nên làm gì?",
-   options:[{k:'E',t:'Báo cáo tài khoản/nội dung', ok:true, out:'Đúng — báo cáo giúp nền tảng xử lý hành vi vi phạm.'},
-            {k:'C2',t:'Im lặng chịu đựng một mình', ok:false, out:'Chịu đựng một mình không phải cách xử lý an toàn.'}]},
-  {q:"Nếu sự việc trở nên nghiêm trọng (đe dọa, lan rộng), em nên?",
-   options:[{k:'F',t:'Tìm sự hỗ trợ thích hợp (nhà trường, cơ quan chức năng)', ok:true, out:'Chính xác — với tình huống nghiêm trọng cần tìm hỗ trợ chuyên nghiệp.'},
-            {k:'A3',t:'Tự giải quyết bằng cách trả đũa', ok:false, out:'Trả đũa có thể khiến sự việc phức tạp và nguy hiểm hơn.'}]}
-];
-function renderCyberbullying(){
-  const el = document.getElementById('act1card');
-  const done = S.completedActivities['B9_CYBERBULLYING'];
-  let stepIdx = 0, correctCount = 0, log=[];
-  el.innerHTML = `<h3>💬 Hoạt động 1 — Khi bị bắt nạt trên mạng</h3><div id="cbBody"></div>`;
-  if(done){
-    el.querySelector('#cbBody').innerHTML = `<div class="feedback ok">Đã hoàn thành. Ghi nhớ: <strong>LƯU BẰNG CHỨNG → KHÔNG ĐỐI ĐẦU KÉO DÀI → CHẶN/BÁO CÁO → CHIA SẺ VỚI NGƯỜI TIN CẬY → TÌM TRỢ GIÚP NẾU NGHIÊM TRỌNG</strong></div>`;
-    return;
-  }
-  function renderStep(){
-    if(stepIdx>=CB_STEPS.length){
-      el.querySelector('#cbBody').innerHTML = `<div class="feedback ok">✅ Hoàn tất chuỗi tình huống!<br><strong>LƯU BẰNG CHỨNG → KHÔNG ĐỐI ĐẦU KÉO DÀI → CHẶN/BÁO CÁO → CHIA SẺ VỚI NGƯỜI TIN CẬY → TÌM TRỢ GIÚP NẾU NGHIÊM TRỌNG</strong></div>`;
-      recordActivity('B9_CYBERBULLYING', {answer:log, correct: correctCount>=3, score: correctCount*5, xp:20});
-      checkP2Next();
-      return;
-    }
-    const step = CB_STEPS[stepIdx];
-    el.querySelector('#cbBody').innerHTML = `<p><strong>Tình huống:</strong> ${step.q}</p>` +
-      step.options.map(o=>`<button class="choice" data-k="${o.k}">${o.t}</button>`).join('') + `<div id="cbfb"></div>`;
-    el.querySelectorAll('#cbBody .choice').forEach(b=>{
-      b.onclick = ()=>{
-        const opt = step.options.find(o=>o.k===b.dataset.k);
-        log.push(opt.k); if(opt.ok) correctCount++;
-        el.querySelectorAll('#cbBody .choice').forEach(x=>{x.disabled=true; x.classList.add(x.dataset.k===opt.k ? (opt.ok?'correct':'incorrect'):'');});
-        document.getElementById('cbfb').innerHTML = feedbackHTML(opt.ok, (opt.ok?'✅ ':'💡 ')+opt.out);
-        setTimeout(()=>{ stepIdx++; renderStep(); }, 1200);
-      };
-    });
-  }
-  renderStep();
-}
-/* ---- Hoạt động 2: két sắt dữ liệu ---- */
-const SAFE_ITEMS = ["Mật khẩu Facebook","Địa chỉ nhà","Ảnh CCCD","Số điện thoại người thân","Mã OTP ngân hàng"];
-function renderDataSafe(){
-  const el = document.getElementById('act2card');
-  const done = S.completedActivities['B9_DATA_SAFE'];
-  el.innerHTML = `<h3>🔒 Hoạt động 2 — Két sắt dữ liệu</h3><p class="small">Bấm vào từng thông tin để cất vào két an toàn (những thông tin cần được giữ kín).</p>
-    <div id="safeItems">${SAFE_ITEMS.map((s,i)=>`<button class="tag" data-i="${i}">${s}</button>`).join('')}</div>
-    <div class="zone" style="margin-top:10px;text-align:center;font-size:40px" id="safeBox">🗄️</div>
-    <div id="safeCount" class="small" style="margin-top:6px">Đã cất: 0 / ${SAFE_ITEMS.length}</div>`;
-  if(done){ el.querySelector('#safeItems').innerHTML=''; el.querySelector('#safeCount').textContent = `Đã cất: ${SAFE_ITEMS.length} / ${SAFE_ITEMS.length} ✅`; return; }
-  let count=0;
-  el.querySelectorAll('#safeItems .tag').forEach(t=>{
-    t.onclick = ()=>{
-      t.remove(); count++;
-      document.getElementById('safeBox').textContent = count%2===0?'🗄️':'🔐';
-      document.getElementById('safeCount').textContent = `Đã cất: ${count} / ${SAFE_ITEMS.length}`;
-      if(count===SAFE_ITEMS.length){
-        recordActivity('B9_DATA_SAFE', {answer:{done:true}, correct:true, score:10, xp:10});
-        checkP2Next();
-      }
-    };
-  });
-}
-/* ---- Hoạt động 3: cân bằng thời gian ---- */
-const BALANCE_CATS = [{k:'hoc',l:'Học tập'},{k:'ngu',l:'Ngủ'},{k:'van',l:'Vận động'},{k:'giadinh',l:'Gia đình'},{k:'net',l:'Internet/Giải trí'}];
-function renderBalance(){
-  const el = document.getElementById('act3card');
-  const done = S.completedActivities['B9_BALANCE'];
-  const vals = (done && done.answer) || {hoc:6,ngu:8,van:1,giadinh:2,net:7};
-  el.innerHTML = `<h3>⏰ Hoạt động 3 — Cân bằng thời gian trong ngày (24 giờ)</h3>` +
-    BALANCE_CATS.map(c=>`<div class="slider-row"><label for="sl_${c.k}">${c.l}</label><input type="range" min="0" max="24" value="${vals[c.k]}" id="sl_${c.k}" ${done?'disabled':''}><span class="val" id="v_${c.k}">${vals[c.k]}h</span></div>`).join('') +
-    `<div id="balTotal" class="small"></div>` + (done?'':`<button class="btn btn-primary" id="balSubmit" style="margin-top:8px">Xác nhận phân bổ</button>`) +
-    `<div id="balFeedback"></div>`;
-  function total(){ return BALANCE_CATS.reduce((s,c)=>s+Number(document.getElementById('sl_'+c.k).value),0); }
-  function refresh(){
-    BALANCE_CATS.forEach(c=>{ document.getElementById('v_'+c.k).textContent = document.getElementById('sl_'+c.k).value+'h'; });
-    const t = total();
-    document.getElementById('balTotal').textContent = `Tổng: ${t} / 24 giờ` + (t===24?' ✅':' — điều chỉnh để đủ 24 giờ');
-  }
-  BALANCE_CATS.forEach(c=>{ document.getElementById('sl_'+c.k).oninput = refresh; });
-  refresh();
-  if(done){
-    document.getElementById('balFeedback').innerHTML = feedbackHTML(true, 'Không có một con số "chuẩn tuyệt đối" — điều quan trọng là em có sự cân bằng giữa học tập, nghỉ ngơi, vận động, gia đình và Internet.');
-    return;
-  }
-  document.getElementById('balSubmit').onclick = ()=>{
-    const t = total();
-    if(t!==24){ document.getElementById('balFeedback').innerHTML = feedbackHTML(false,'💡 Tổng chưa đủ 24 giờ, em điều chỉnh lại nhé.'); return; }
-    const answer = {}; BALANCE_CATS.forEach(c=>answer[c.k]=Number(document.getElementById('sl_'+c.k).value));
-    const netHigh = answer.net >= 10;
-    document.getElementById('balFeedback').innerHTML = feedbackHTML(!netHigh,
-      netHigh ? '💡 Thời gian Internet/Giải trí khá cao, em thử cân nhắc dành thêm thời gian cho vận động, gia đình và giấc ngủ.' :
-      '✅ Cách phân bổ của em khá cân bằng giữa học tập, nghỉ ngơi và Internet.');
-    document.getElementById('balSubmit').disabled = true;
-    BALANCE_CATS.forEach(c=>document.getElementById('sl_'+c.k).disabled=true);
-    recordActivity('B9_BALANCE', {answer, correct:true, score:10, xp:10});
-    checkP2Next();
-  };
-}
-
-/* =========================================================
-   TRANG 3 – TRUY TÌM MALWARE
-========================================================= */
-function renderP3(){
-  app.innerHTML = `
-  ${pageNav('p3')}
-  <div class="card">
-    <div class="eyebrow">TRANG 3 · ~20 PHÚT</div>
-    <h2>🦠 Truy tìm Malware</h2>
-    <p>Có phải mọi phần mềm độc hại đều là virus? Hãy khám phá 3 loại phổ biến.</p>
-    <p class="small">⚠️ Toàn bộ nội dung dưới đây chỉ là <strong>mô phỏng giáo dục</strong> bằng hình ảnh/animation — không có mã độc thật.</p>
-  </div>
-  <div class="card" id="virusCard"></div>
-  <div class="card" id="wormCard"></div>
-  <div class="card" id="trojanCard"></div>
-  <div class="card" id="classifyCard"></div>
-  <div class="card" id="p3next" style="display:none">
-    <button class="btn btn-outline" onclick="go('p2')" style="margin-right:8px">◀ Trang 2</button>
-    <button class="btn btn-primary" onclick="go('p4')">Sang Trang 4 ▶</button>
-  </div>
-  `;
-  renderVirusSim(); renderWormSim(); renderTrojanSim(); renderClassifyGame();
-  checkP3Next();
-}
-function checkP3Next(){
-  if(['B9_VIRUS_SIM','B9_WORM_SIM','B9_TROJAN_SIM','B9_MALWARE_CLASSIFY'].every(a=>S.completedActivities[a])){
-    document.getElementById('p3next').style.display='block';
-    if(!S.completedActivities['__badge_malware']){
-      S.completedActivities['__badge_malware']={done:true}; S.xp+=20; xpToast('🦠 Malware Hunter +20 XP'); saveLocal(); updateTopbar();
-    }
-  }
-}
-function renderVirusSim(){
-  const el = document.getElementById('virusCard'); const done = S.completedActivities['B9_VIRUS_SIM'];
-  el.innerHTML = `<h3>🦠 Mô phỏng: VIRUS</h3>
-    <div class="sim-track">
-      <div class="sim-node" id="v1">📄<br></div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="v2">⚙️</div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="v3">🦠</div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="v4">⚙️</div>
-    </div>
-    <p class="small">Ứng dụng A (📄) → mã độc gắn vào chương trình (⚙️) → chương trình chạy, virus kích hoạt (🦠) → lây sang chương trình khác (⚙️)</p>
-    <button class="btn btn-outline" id="vRun">▶ CHẠY MÔ PHỎNG</button>
-    <div id="vFeedback"></div>`;
-  document.getElementById('vRun').onclick = ()=>{
-    ['v2','v3','v4'].forEach((id,i)=>setTimeout(()=>document.getElementById(id).classList.add('infected'), (i+1)*500));
-    setTimeout(()=>{
-      document.getElementById('vFeedback').innerHTML = feedbackHTML(true,'✅ Virus không phải một chương trình hoàn chỉnh — nó là đoạn mã độc gắn vào chương trình khác. Khi chương trình bị nhiễm chạy, virus mới hoạt động và tiếp tục lây lan.');
-      if(!done) recordActivity('B9_VIRUS_SIM', {answer:{watched:true}, correct:true, score:10, xp:10});
-      checkP3Next();
-    }, 1800);
-  };
-  if(done){ ['v2','v3','v4'].forEach(id=>document.getElementById(id).classList.add('infected')); document.getElementById('vFeedback').innerHTML = feedbackHTML(true,'Virus cần "vật chủ" (chương trình khác) để phát tác và lây lan.'); }
-}
-function renderWormSim(){
-  const el = document.getElementById('wormCard'); const done = S.completedActivities['B9_WORM_SIM'];
-  el.innerHTML = `<h3>🐛 Mô phỏng: WORM (sâu máy tính)</h3>
-    <div class="sim-track">
-      <div class="sim-node" id="w1">🖥️A</div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="w2">🖥️B</div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="w3">🖥️C</div><div class="sim-arrow">→</div>
-      <div class="sim-node" id="w4">🖥️D</div>
-    </div>
-    <button class="btn btn-outline" id="wRun">▶ CHẠY MÔ PHỎNG</button>
-    <div id="wFeedback"></div>`;
-  document.getElementById('wRun').onclick = ()=>{
-    ['w1','w2','w3','w4'].forEach((id,i)=>setTimeout(()=>document.getElementById(id).classList.add('infected'), i*500));
-    setTimeout(()=>{
-      document.getElementById('wFeedback').innerHTML = feedbackHTML(true,'✅ Worm là một chương trình hoàn chỉnh, có khả năng tự lan truyền — có thể lợi dụng lỗ hổng hoặc đánh lừa người dùng cài đặt/chạy, phát tán qua liên kết, email hoặc tin nhắn.');
-      if(!done) recordActivity('B9_WORM_SIM', {answer:{watched:true}, correct:true, score:10, xp:10});
-      checkP3Next();
-    }, 2200);
-  };
-  if(done){ ['w1','w2','w3','w4'].forEach(id=>document.getElementById(id).classList.add('infected')); }
-}
-function renderTrojanSim(){
-  const el = document.getElementById('trojanCard'); const done = S.completedActivities['B9_TROJAN_SIM'];
-  el.innerHTML = `<h3>🎁 Mô phỏng: TROJAN</h3>
-    <div style="text-align:center;font-size:44px" id="trojanIcon">🎁<div class="small" style="font-size:14px">Free_Game.exe</div></div>
-    <div style="text-align:center;margin:10px 0"><button class="btn btn-outline" id="trojanOpen">👁 XEM BÊN TRONG</button></div>
-    <div id="trojanInside" class="hidden grid2">
-      <div class="pill danger">🐴 Trojan</div>
-      <div class="pill danger">👁 Spyware</div>
-      <div class="pill danger">⌨ Keylogger</div>
-      <div class="pill danger">🚪 Backdoor</div>
-      <div class="pill danger">🔑 Rootkit</div>
-    </div>
-    <div id="trojanFeedback"></div>`;
-  function reveal(){
-    document.getElementById('trojanIcon').textContent = '🎁 → 🐴';
-    document.getElementById('trojanInside').classList.remove('hidden');
-    document.getElementById('trojanFeedback').innerHTML = feedbackHTML(true, '✅ Trojan là phần mềm nội gián — trông như vô hại nhưng chủ yếu nhằm đánh cắp thông tin hoặc chiếm quyền (spyware, keylogger, backdoor, rootkit là các ví dụ liên quan).');
-    if(!done) recordActivity('B9_TROJAN_SIM', {answer:{opened:true}, correct:true, score:10, xp:10});
-    checkP3Next();
-  }
-  document.getElementById('trojanOpen').onclick = reveal;
-  if(done) reveal();
-}
-const CLASSIFY_CARDS = [
-  {id:'c1', text:'Đoạn mã độc gắn vào chương trình khác', ans:'virus'},
-  {id:'c2', text:'Là chương trình hoàn chỉnh, tự lan truyền qua mạng', ans:'worm'},
-  {id:'c3', text:'Trông vô hại nhưng đánh cắp thông tin/chiếm quyền', ans:'trojan'},
-  {id:'c4', text:'Cần chương trình chủ chạy thì mới kích hoạt', ans:'virus'},
-  {id:'c5', text:'Có thể phát tán qua liên kết, email, tin nhắn', ans:'worm'},
-  {id:'c6', text:'Bao gồm spyware, keylogger, backdoor, rootkit', ans:'trojan'}
-];
-function renderClassifyGame(){
-  const el = document.getElementById('classifyCard'); const done = S.completedActivities['B9_MALWARE_CLASSIFY'];
-  const placed = (done && done.answer) || {};
-  el.innerHTML = `<h3>🎯 Game — Ai là ai?</h3><p class="small">Chọn một thẻ mô tả rồi bấm vào khu vực Virus / Worm / Trojan phù hợp.</p>
-    <div id="clTags">${CLASSIFY_CARDS.map(c=> placed[c.id]?'' : `<button class="tag" data-tag="${c.id}" style="display:block;text-align:left;width:100%">${c.text}</button>`).join('')}</div>
-    <div class="grid3" style="margin-top:10px">
-      <div class="zone" data-zone="virus"><h4>🦠 VIRUS</h4><div id="zone-virus"></div></div>
-      <div class="zone" data-zone="worm"><h4>🐛 WORM</h4><div id="zone-worm"></div></div>
-      <div class="zone" data-zone="trojan"><h4>🐴 TROJAN</h4><div id="zone-trojan"></div></div>
-    </div>
-    <div id="clFeedback"></div>
-    <div id="clSummary" class="hidden" style="margin-top:14px">
-      <table><tr><th></th><th>Virus</th><th>Worm</th><th>Trojan</th></tr>
-      <tr><td>Hoàn chỉnh?</td><td>Không</td><td>Có</td><td>Có</td></tr>
-      <tr><td>Lây nhiễm?</td><td>Nhờ vật chủ</td><td>Tự lan truyền</td><td>Cần người dùng cài đặt</td></tr>
-      <tr><td>Cách hoạt động?</td><td>Gắn vào chương trình khác</td><td>Lợi dụng lỗ hổng/đánh lừa</td><td>Ngụy trang phần mềm vô hại</td></tr>
-      <tr><td>Tác hại?</td><td>Phá hỏng dữ liệu, lây lan</td><td>Làm tê liệt hệ thống</td><td>Đánh cắp dữ liệu, chiếm quyền</td></tr>
-      </table>
-    </div>`;
-  Object.keys(placed).forEach(id=>{
-    const c = CLASSIFY_CARDS.find(x=>x.id===id);
-    const z = document.getElementById('zone-'+placed[id]); if(z) z.innerHTML += `<span class="tag placed">${c.text}</span>`;
-  });
-  if(done){ document.getElementById('clSummary').classList.remove('hidden'); return; }
-  let picked=null, correctCount=0, totalPlaced=0;
-  el.querySelectorAll('#clTags .tag').forEach(t=>{ t.onclick = ()=>{ picked=t.dataset.tag; el.querySelectorAll('#clTags .tag').forEach(x=>x.classList.toggle('picked', x===t)); }; });
-  el.querySelectorAll('.zone').forEach(z=>{
-    z.addEventListener('click', ()=>{
-      if(!picked) return;
-      const c = CLASSIFY_CARDS.find(x=>x.id===picked);
-      const correct = c.ans===z.dataset.zone;
-      const tagEl = el.querySelector('#clTags .tag[data-tag="'+picked+'"]'); if(tagEl) tagEl.remove();
-      document.getElementById('zone-'+z.dataset.zone).innerHTML += `<span class="tag placed">${c.text} ${correct?'✅':'🔁'}</span>`;
-      document.getElementById('clFeedback').innerHTML = feedbackHTML(correct, correct?'✅ Chính xác!':'💡 Chưa đúng — thẻ này thuộc nhóm khác, em xem lại đặc điểm nhé.');
-      totalPlaced++; if(correct) correctCount++;
-      placed[picked]=z.dataset.zone; picked=null;
-      if(totalPlaced===CLASSIFY_CARDS.length){
-        document.getElementById('clSummary').classList.remove('hidden');
-        recordActivity('B9_MALWARE_CLASSIFY', {answer:placed, correct: correctCount>=4, score: correctCount*4, xp:15});
-        checkP3Next();
-      }
-    });
-  });
-}
-
-/* =========================================================
-   TRANG 4 – TRUNG TÂM PHÒNG VỆ SỐ
-========================================================= */
-const ALLOW_SCENARIOS = [
-  {id:1, text:"Bạn gửi một liên kết bất thường, kèm lời nhắn 'mở đi, hay lắm'.", ans:'stop'},
-  {id:2, text:"Website lạ yêu cầu tải phần mềm 'miễn phí' để xem nội dung.", ans:'stop'},
-  {id:3, text:"Một chiếc USB không rõ nguồn gốc được cắm vào máy.", ans:'check'},
-  {id:4, text:"Ứng dụng được tải từ cửa hàng ứng dụng chính thức.", ans:'go'},
-  {id:5, text:"Email lạ yêu cầu mở file đính kèm bất ngờ.", ans:'stop'}
-];
-function renderP4(){
-  app.innerHTML = `
-  ${pageNav('p4')}
-  <div class="card">
-    <div class="eyebrow">TRANG 4 · ~22 PHÚT</div>
-    <h2>🛡 Trung tâm phòng vệ số</h2>
-  </div>
-  <div class="card" id="allowCard"></div>
-  <div class="card" id="defenderCard"></div>
-  <div class="card" id="p4next" style="display:none">
-    <button class="btn btn-outline" onclick="go('p3')" style="margin-right:8px">◀ Trang 3</button>
-    <button class="btn btn-primary" onclick="go('p5')">Sang Trang 5 ▶</button>
-  </div>
-  `;
-  renderAllowGame(); renderDefenderLab();
-  checkP4Next();
-}
-function checkP4Next(){
-  if(['B9_SAFE_DOWNLOAD','B9_DEFENDER_SCAN'].every(a=>S.completedActivities[a])){
-    document.getElementById('p4next').style.display='block';
-    if(!S.completedActivities['__badge_defender']){
-      S.completedActivities['__badge_defender']={done:true}; S.xp+=25; xpToast('🛡 Cyber Defender +25 XP'); saveLocal(); updateTopbar();
-    }
-  }
-}
-function renderAllowGame(){
-  const el = document.getElementById('allowCard'); const done = S.completedActivities['B9_SAFE_DOWNLOAD'];
-  const answered = (done && done.answer) || {};
-  el.innerHTML = `<h3>🅰️ Phần A — Cho phép hay chặn?</h3>` +
-    ALLOW_SCENARIOS.map(s=>`
-      <div class="post-card" id="allow${s.id}">
-        <p>${s.id}. ${s.text}</p>
-        <div class="grid3">
-          <button class="choice" data-a="${s.id}" data-v="go">🟢 TIẾP TỤC</button>
-          <button class="choice" data-a="${s.id}" data-v="check">🟡 KIỂM TRA THÊM</button>
-          <button class="choice" data-a="${s.id}" data-v="stop">🔴 DỪNG LẠI</button>
-        </div>
-        <div class="feedback" id="allowfb${s.id}" style="display:none"></div>
-      </div>`).join('');
-  let correctCount=0, count=0;
-  el.querySelectorAll('[data-a]').forEach(b=>{
-    const sid = b.dataset.a;
-    if(done){ b.disabled=true; if(answered[sid]===b.dataset.v){ const s=ALLOW_SCENARIOS.find(x=>x.id==sid); b.classList.add(s.ans===b.dataset.v?'correct':'incorrect'); } return; }
-    b.onclick = ()=>{
-      const s = ALLOW_SCENARIOS.find(x=>x.id==sid);
-      const correct = s.ans===b.dataset.v;
-      el.querySelectorAll('[data-a="'+sid+'"]').forEach(x=>x.disabled=true);
-      b.classList.add(correct?'correct':'incorrect');
-      const fb = document.getElementById('allowfb'+sid); fb.style.display='block';
-      fb.className='feedback '+(correct?'ok':'hint');
-      fb.textContent = correct ? '✅ Lựa chọn phù hợp.' : ('💡 Cân nhắc lại — mức an toàn phù hợp cho tình huống này là '+({go:'🟢 Tiếp tục',check:'🟡 Kiểm tra thêm',stop:'🔴 Dừng lại'}[s.ans])+'.');
-      answered[sid]=b.dataset.v; count++; if(correct) correctCount++;
-      if(count===ALLOW_SCENARIOS.length){
-        recordActivity('B9_SAFE_DOWNLOAD', {answer:answered, correct: correctCount>=3, score: correctCount*4, xp:15});
-        checkP4Next();
-      }
-    };
-  });
-}
-const WSEC_SITUATIONS = [
-  {id:'A', text:'Muốn kiểm tra nhanh những vị trí thường bị đe dọa.', ans:'quick', label:'Quick scan'},
-  {id:'B', text:'Muốn kiểm tra toàn bộ ổ đĩa.', ans:'full', label:'Full scan'},
-  {id:'C', text:'Chỉ muốn kiểm tra thư mục vừa tải tệp về.', ans:'custom', label:'Custom scan'},
-  {id:'D', text:'Một mối đe dọa khó xử lí khi Windows đang chạy.', ans:'offline', label:'Windows Defender Offline scan'}
-];
-function renderDefenderLab(){
-  const el = document.getElementById('defenderCard'); const done = S.completedActivities['B9_DEFENDER_SCAN'];
-  el.innerHTML = `<h3>🅱️ Phần B — Windows Security Lab (mô phỏng)</h3>
-    <div class="wsec-window">
-      <div class="wsec-titlebar">🛡️ Windows Security</div>
-      <div class="wsec-body">
-        <div class="wsec-nav">
-          <div class="active">Virus & threat protection</div>
-          <div>Current threats</div>
-          <div>Scan options</div>
-          <div>Threat history</div>
-        </div>
-        <div class="wsec-content" id="wsecContent"></div>
-      </div>
-    </div>
-    <footer class="note">Giao diện thực tế có thể khác tùy phiên bản Windows. Đây chỉ là mô phỏng giáo dục, không quét máy tính thật.</footer>`;
-  const content = document.getElementById('wsecContent');
-  if(done){
-    content.innerHTML = `<p>✅ Đã hoàn thành thực hành chọn kiểu quét phù hợp cho cả 4 tình huống.</p>`;
-    return;
-  }
-  let idx = 0; const answered = {};
-  function renderSituation(){
-    if(idx>=WSEC_SITUATIONS.length){ return runScanAnimation(); }
-    const s = WSEC_SITUATIONS[idx];
-    content.innerHTML = `<p><strong>Máy tính đang có dấu hiệu bất thường.</strong></p><p>${s.text}</p>
-      <div class="grid2">
-        <button class="choice" data-sc="quick">Quick scan</button>
-        <button class="choice" data-sc="full">Full scan</button>
-        <button class="choice" data-sc="custom">Custom scan</button>
-        <button class="choice" data-sc="offline">Windows Defender Offline scan</button>
-      </div><div id="wsecFb"></div>`;
-    content.querySelectorAll('[data-sc]').forEach(b=>{
-      b.onclick = ()=>{
-        const correct = b.dataset.sc===s.ans;
-        content.querySelectorAll('[data-sc]').forEach(x=>{x.disabled=true; if(x.dataset.sc===s.ans) x.classList.add('correct'); else if(x===b) x.classList.add('incorrect');});
-        document.getElementById('wsecFb').innerHTML = feedbackHTML(correct, correct?'✅ Chính xác — '+s.label+' phù hợp với tình huống này.':'💡 Kiểu quét phù hợp hơn là '+s.label+'.');
-        answered[s.id]=b.dataset.sc;
-        setTimeout(()=>{ idx++; renderSituation(); }, 1300);
-      };
-    });
-  }
-  function runScanAnimation(){
-    content.innerHTML = `<p><strong>Đang quét...</strong></p>
-      <div class="scan-progress-outer"><div class="scan-progress-inner" id="scanBar"></div></div>
-      <div id="scanFiles"></div>
-      <div id="scanDone" class="hidden"></div>`;
-    const files = ['File 1 ✅','File 2 ✅','File 3 ⚠️ (đã cách ly)','File 4 ✅','File 5 ✅'];
-    let pct = 0;
-    const bar = document.getElementById('scanBar');
-    const filesDiv = document.getElementById('scanFiles');
-    let fi = 0;
-    const timer = setInterval(()=>{
-      pct += 20; bar.style.width = Math.min(pct,100)+'%';
-      if(fi<files.length){ filesDiv.innerHTML += `<div class="scan-file-row">${files[fi]}</div>`; fi++; }
-      if(pct>=100){
-        clearInterval(timer);
-        document.getElementById('scanDone').classList.remove('hidden');
-        document.getElementById('scanDone').innerHTML = `<div class="feedback ok">✅ Quét hoàn tất — 1 mối đe dọa được phát hiện và cách ly. Đây là mô phỏng minh họa quy trình Quick scan / Full scan / Custom scan / Offline scan trong Windows Security.</div>`;
-        const correctCount = WSEC_SITUATIONS.filter(s=>answered[s.id]===s.ans).length;
-        recordActivity('B9_DEFENDER_SCAN', {answer:answered, correct: correctCount>=3, score: correctCount*5, xp:15});
-        checkP4Next();
-      }
-    }, 500);
-  }
-  renderSituation();
-}
-
-/* =========================================================
-   TRANG 5 – THỬ THÁCH CUỐI + EXIT TICKET
-========================================================= */
-const FINAL_QUESTIONS = [
-  {type:'mcq', q:'Phần mềm nào KHÔNG phải là một chương trình hoàn chỉnh, mà là đoạn mã gắn vào chương trình khác?',
-   opts:[['Virus',true],['Worm',false],['Trojan',false]]},
-  {type:'mcq', q:'Khi nhận được tin nhắn thúc giục bấm vào liên kết lạ, việc nên làm TRƯỚC TIÊN là gì?',
-   opts:[['Bấm vào xem thử',false],['Kiểm tra nguồn / xác minh bằng cách khác',true],['Chuyển tiếp cho bạn bè',false]]},
-  {type:'scenario', q:"Một người bạn gửi file lạ và nói: 'Mở thử đi, vui lắm!'. Bạn nên làm gì trước?",
-   opts:[['Mở ngay vì là bạn thân gửi',false],['Xác minh với bạn qua kênh khác trước khi mở',true],['Chuyển tiếp cho cả lớp',false]]},
-  {type:'classify', q:'Hãy chọn nhóm phù hợp cho "Mã OTP ngân hàng":', opts:[['Có thể chia sẻ',false],['Cần cân nhắc',false],['Không nên công khai',true]]},
-  {type:'match', q:'Ghép mô tả với loại phần mềm độc hại: "Tự lan truyền qua email/liên kết mà không cần vật chủ" là:',
-   opts:[['Virus',false],['Worm',true],['Trojan',false]]},
-  {type:'decision', q:'Bị bắt nạt trên mạng, bước đầu tiên nên làm là:',
-   opts:[['Tranh cãi lại ngay',false],['Lưu bằng chứng',true],['Xóa hết tin nhắn',false]]},
-  {type:'short', q:'Em hãy nêu ngắn gọn (1-2 câu): Vì sao không nên tải phần mềm từ nguồn không rõ?'}
-];
-function renderP5(){
-  app.innerHTML = `
-  ${pageNav('p5')}
-  <div class="card">
-    <div class="eyebrow">TRANG 5 · ~15 PHÚT</div>
-    <h2>🏁 Thử thách cuối + Exit Ticket</h2>
-  </div>
-  <div class="card" id="finalCard"></div>
-  <div class="card hidden" id="mindmapCard"></div>
-  <div class="card hidden" id="exitCard"></div>
-  <div class="card hidden" id="finishCard">
-    <button class="btn btn-outline" onclick="go('p4')" style="margin-right:8px">◀ Trang 4</button>
-    <button class="btn btn-primary" id="btnFinish">HOÀN THÀNH BÀI HỌC 🏁</button>
-  </div>
-  `;
-  renderFinalChallenge();
-}
-function renderFinalChallenge(){
-  const el = document.getElementById('finalCard'); const done = S.completedActivities['B9_FINAL_CHALLENGE'];
-  if(done){
-    el.innerHTML = `<h3>🧩 Cyber Safety Challenge</h3><div class="feedback ok">Đã hoàn thành — điểm: ${done.score}/${FINAL_QUESTIONS.length*10}.</div>`;
-    document.getElementById('mindmapCard').classList.remove('hidden'); renderMindmap();
-    document.getElementById('exitCard').classList.remove('hidden'); renderExitTicket();
-    return;
-  }
-  let idx=0, correctCount=0, log=[];
-  el.innerHTML = `<h3>🧩 Cyber Safety Challenge</h3><div id="fcBody"></div>`;
-  function renderQ(){
-    if(idx>=FINAL_QUESTIONS.length){
-      el.querySelector('#fcBody').innerHTML = `<div class="feedback ok">✅ Hoàn thành thử thách — ${correctCount}/${FINAL_QUESTIONS.length} câu đúng.</div>`;
-      recordActivity('B9_FINAL_CHALLENGE', {answer:log, correct: correctCount>=FINAL_QUESTIONS.length/2, score: correctCount*10, xp:25});
-      document.getElementById('mindmapCard').classList.remove('hidden'); renderMindmap();
-      document.getElementById('exitCard').classList.remove('hidden'); renderExitTicket();
-      return;
-    }
-    const q = FINAL_QUESTIONS[idx];
-    let html = `<p class="small">Câu ${idx+1}/${FINAL_QUESTIONS.length}</p><p><strong>${q.q}</strong></p>`;
-    if(q.type==='short'){
-      html += `<textarea id="fcShort" aria-label="Câu trả lời ngắn"></textarea><button class="btn btn-primary" id="fcShortSubmit" style="margin-top:8px">Gửi câu trả lời</button>`;
-    } else {
-      html += q.opts.map((o,i)=>`<button class="choice" data-i="${i}">${o[0]}</button>`).join('');
-    }
-    el.querySelector('#fcBody').innerHTML = html + `<div id="fcFb"></div>`;
-    if(q.type==='short'){
-      document.getElementById('fcShortSubmit').onclick = ()=>{
-        const txt = document.getElementById('fcShort').value.trim();
-        const ok = txt.length>=8;
-        log.push(txt); if(ok) correctCount++;
-        document.getElementById('fcFb').innerHTML = feedbackHTML(ok, ok?'✅ Cảm ơn câu trả lời của em.':'💡 Em thử viết rõ hơn một chút nhé.');
-        setTimeout(()=>{ idx++; renderQ(); }, 1000);
-      };
-    } else {
-      el.querySelectorAll('#fcBody .choice').forEach(b=>{
-        b.onclick = ()=>{
-          const opt = q.opts[b.dataset.i];
-          log.push(opt[0]); if(opt[1]) correctCount++;
-          el.querySelectorAll('#fcBody .choice').forEach((x,i)=>{ x.disabled=true; if(q.opts[i][1]) x.classList.add('correct'); else if(x===b) x.classList.add('incorrect'); });
-          document.getElementById('fcFb').innerHTML = feedbackHTML(opt[1], opt[1]?'✅ Chính xác.':'💡 Chưa chính xác. Em thử quan sát lại dấu hiệu trong tình huống.');
-          setTimeout(()=>{ idx++; renderQ(); }, 1100);
-        };
-      });
-    }
-  }
-  renderQ();
-}
-/* ---- Mindmap ---- */
-const MINDMAP_SUGGEST = {
-  "Nguy cơ":["tin giả","lừa đảo","lộ dữ liệu","bắt nạt mạng","dùng Internet quá mức"],
-  "Malware":["virus","worm","trojan","spyware","keylogger"],
-  "Phòng tránh":["kiểm tra nguồn","giữ mật khẩu","không tải file lạ","Windows Defender","báo người tin cậy"]
-};
-function renderMindmap(){
-  const el = document.getElementById('mindmapCard'); const done = S.completedActivities['B9_MINDMAP'];
-  el.innerHTML = `<h3>🧠 1 phút vẽ lại bài học</h3><p class="small">Chọn hoặc nhập 3–5 từ khóa cho mỗi nhánh.</p>
-    <div id="mmSvgWrap" style="margin-bottom:10px"></div>` +
-    Object.keys(MINDMAP_SUGGEST).map(branch=>`
-      <div style="margin-bottom:14px">
-        <strong>${branch}</strong>
-        <div id="mmSuggest_${branch.replace(/\s/g,'')}">${MINDMAP_SUGGEST[branch].map(k=>`<button class="tag" data-branch="${branch}" data-kw="${k}" ${done?'disabled':''}>${k}</button>`).join('')}</div>
-        <div style="display:flex;gap:8px;margin-top:6px">
-          <input type="text" placeholder="Nhập từ khóa khác..." id="mmInput_${branch.replace(/\s/g,'')}" ${done?'disabled':''}>
-          <button class="btn btn-outline" data-addbranch="${branch}" ${done?'disabled':''} style="min-height:44px">Thêm</button>
-        </div>
-        <div id="mmChosen_${branch.replace(/\s/g,'')}" style="margin-top:6px"></div>
-      </div>`).join('') +
-    (done?'':`<button class="btn btn-primary" id="mmSubmit">Lưu sơ đồ tư duy</button>`) + `<div id="mmFb"></div>`;
-  function refreshChosen(branch){
-    const key = branch.replace(/\s/g,'');
-    document.getElementById('mmChosen_'+key).innerHTML = S.mindmap[branch].map(k=>`<span class="tag placed">${k} <button aria-label="Xóa" data-remove="${branch}|${k}" style="border:none;background:none;cursor:pointer">✕</button></span>`).join('');
-    renderMindmapSVG();
-  }
-  Object.keys(MINDMAP_SUGGEST).forEach(branch=>refreshChosen(branch));
-  if(done){ renderMindmapSVG(); return; }
-  el.querySelectorAll('[data-branch]').forEach(b=>{
-    b.onclick = ()=>{
-      const branch=b.dataset.branch, kw=b.dataset.kw;
-      if(S.mindmap[branch].length>=5) return;
-      if(!S.mindmap[branch].includes(kw)) S.mindmap[branch].push(kw);
-      refreshChosen(branch); saveLocal();
-    };
-  });
-  el.querySelectorAll('[data-addbranch]').forEach(b=>{
-    b.onclick = ()=>{
-      const branch=b.dataset.addbranch, key=branch.replace(/\s/g,'');
-      const inp = document.getElementById('mmInput_'+key);
-      const val = inp.value.trim();
-      if(val && S.mindmap[branch].length<5 && !S.mindmap[branch].includes(val)){ S.mindmap[branch].push(val); inp.value=''; refreshChosen(branch); saveLocal(); }
-    };
-  });
-  el.addEventListener('click', (e)=>{
-    if(e.target.dataset && e.target.dataset.remove){
-      const [branch,kw] = e.target.dataset.remove.split('|');
-      S.mindmap[branch] = S.mindmap[branch].filter(x=>x!==kw);
-      refreshChosen(branch); saveLocal();
-    }
-  });
-  document.getElementById('mmSubmit').onclick = ()=>{
-    const total = Object.values(S.mindmap).reduce((s,a)=>s+a.length,0);
-    if(total<3){ document.getElementById('mmFb').innerHTML = feedbackHTML(false,'💡 Em chọn thêm ít nhất vài từ khóa cho các nhánh nhé.'); return; }
-    recordActivity('B9_MINDMAP', {answer:S.mindmap, correct:true, score:10, xp:15});
-    document.getElementById('mmFb').innerHTML = feedbackHTML(true,'✅ Đã lưu sơ đồ tư duy của em.');
-    el.querySelectorAll('[data-branch],[data-addbranch],input').forEach(x=>x.disabled=true);
-  };
-}
-function renderMindmapSVG(){
-  const wrap = document.getElementById('mmSvgWrap'); if(!wrap) return;
-  const branches = Object.keys(S.mindmap);
-  const positions = [[150,40],[280,150],[20,150]];
-  let svg = `<svg viewBox="0 0 300 220" style="width:100%;max-width:340px;background:#f8fbff;border-radius:12px;border:1px solid var(--border)">
-    <circle cx="150" cy="150" r="34" fill="#0f2440"/><text x="150" y="146" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">AN TOÀN</text><text x="150" y="158" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">MẠNG</text>`;
-  branches.forEach((b,i)=>{
-    const [x,y] = positions[i];
-    svg += `<line x1="150" y1="150" x2="${x}" y2="${y}" stroke="#22d3ee" stroke-width="2"/>`;
-    svg += `<circle cx="${x}" cy="${y}" r="26" fill="#eafcff" stroke="#0891b2" stroke-width="2"/>`;
-    svg += `<text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" fill="#0f2440" font-weight="700">${b}</text>`;
-  });
-  svg += `</svg>`;
-  wrap.innerHTML = svg;
-}
-/* ---- Exit ticket ---- */
-function renderExitTicket(){
-  const el = document.getElementById('exitCard'); const done = S.completedActivities['B9_EXIT_TICKET'];
-  const difficultOpts = ['Nguy cơ trên mạng','Bảo vệ thông tin cá nhân','Bắt nạt trên mạng','Virus – Worm – Trojan','Phòng chống malware','Windows Security'];
-  if(done){
-    el.innerHTML = `<h3>📝 Exit Ticket</h3><div class="feedback ok">Cảm ơn em đã hoàn thành Exit Ticket!</div>`;
-    document.getElementById('finishCard').classList.remove('hidden');
-    return;
-  }
-  el.innerHTML = `<h3>📝 Exit Ticket</h3>
-    <label>1. Hôm nay em hiểu rõ nhất điều gì?</label>
-    <textarea id="et1"></textarea>
-    <label style="margin-top:12px">2. Phần nào em thấy khó nhất? (chọn tất cả phù hợp)</label>
-    ${difficultOpts.map(o=>`<div class="checklist-item"><input type="checkbox" id="et2_${o}" value="${o}"><label for="et2_${o}" style="margin:0;font-weight:400">${o}</label></div>`).join('')}
-    <label style="margin-top:12px">3. Nếu nhận một liên kết bất thường từ tài khoản của bạn thân, em sẽ làm gì trước?</label>
-    <textarea id="et3"></textarea>
-    <label style="margin-top:12px">4. Em tự đánh giá mức độ hiểu bài:</label>
-    <div class="emoji-scale" id="et4">
-      <button data-v="1">😕</button><button data-v="2">😐</button><button data-v="3">🙂</button><button data-v="4">😊</button><button data-v="5">🤩</button>
-    </div>
-    <label style="margin-top:12px">5. Em còn điều gì muốn thầy giải thích?</label>
-    <textarea id="et5"></textarea>
-    <button class="btn btn-primary" id="etSubmit" style="margin-top:14px">Nộp Exit Ticket</button>
-    <div id="etFb"></div>`;
-  let understanding = null;
-  document.querySelectorAll('#et4 button').forEach(b=>{
-    b.onclick = ()=>{ document.querySelectorAll('#et4 button').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); understanding = b.dataset.v; };
-  });
-  document.getElementById('etSubmit').onclick = ()=>{
-    const difficult = difficultOpts.filter(o=>document.getElementById('et2_'+o).checked);
-    if(!understanding){ document.getElementById('etFb').innerHTML = feedbackHTML(false,'💡 Em chọn mức độ hiểu bài ở câu 4 nhé.'); return; }
-    const exitData = {
-      learned: document.getElementById('et1').value.trim(),
-      difficultPart: difficult,
-      application: document.getElementById('et3').value.trim(),
-      understanding, question: document.getElementById('et5').value.trim()
-    };
-    S.exitTicket = exitData; saveLocal();
-    apiPost('exit', Object.assign({studentKey:S.studentKey, lessonId:CONFIG.lessonId, studentId:S.studentId, hoTen:S.hoTen, lop:S.lop, mindmapJSON: JSON.stringify(S.mindmap)}, exitData));
-    recordActivity('B9_EXIT_TICKET', {answer:exitData, correct:true, score:10, xp:15});
-    document.getElementById('etFb').innerHTML = feedbackHTML(true,'✅ Cảm ơn em đã hoàn thành Exit Ticket!');
-    document.getElementById('etSubmit').disabled = true;
-    document.getElementById('finishCard').classList.remove('hidden');
-  };
-}
-
-/* =========================================================
-   HOÀN TẤT + CẢNH BÁO HOÀN THÀNH NHANH
-========================================================= */
-document.addEventListener('click', (e)=>{
-  if(e.target && e.target.id==='btnFinish') onFinish();
-});
-function fmtDuration(sec){
-  const m = Math.floor(sec/60), s = sec%60;
-  return String(m).padStart(2,'0')+' phút '+String(s).padStart(2,'0')+' giây';
-}
-function onFinish(){
-  const start = new Date(S.startTime).getTime();
-  const now = Date.now();
-  const durationSeconds = Math.max(0, Math.round((now-start)/1000));
-  const fastFinish = durationSeconds < CONFIG.fastFinishMinutes*60;
-  S.completeTime = new Date().toISOString();
-  S.durationSeconds = durationSeconds; S.fastFinish = fastFinish;
-  saveLocal();
-  if(fastFinish){ showFastFinishWarning(durationSeconds); }
-  else { completeStudent(durationSeconds, fastFinish); }
-}
-function showFastFinishWarning(durationSeconds){
-  const overlay = document.createElement('div'); overlay.className='modal-overlay';
-  overlay.innerHTML = `<div class="modal-box">
-    <h3>⚠️ EM ĐANG HOÀN THÀNH BÀI KHÁ NHANH</h3>
-    <p>Thời gian của em: <strong>${fmtDuration(durationSeconds)}</strong>.</p>
-    <p>Bài học được thiết kế để em có thời gian quan sát, suy nghĩ và thử các tình huống. Hãy kiểm tra lại:</p>
-    <div class="checklist-item">☐ Các câu em trả lời sai hoặc phải thử nhiều lần</div>
-    <div class="checklist-item">☐ Hoạt động Virus – Worm – Trojan</div>
-    <div class="checklist-item">☐ Mô phỏng Windows Security</div>
-    <div class="checklist-item">☐ Exit Ticket</div>
-    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-      <button class="btn btn-outline" id="ffReview">XEM LẠI BÀI</button>
-      <button class="btn btn-primary" id="ffOk">TÔI ĐÃ KIỂM TRA – HOÀN TẤT</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  document.getElementById('ffReview').onclick = ()=>{ overlay.remove(); go('p1'); };
-  document.getElementById('ffOk').onclick = ()=>{ overlay.remove(); completeStudent(durationSeconds, true); };
-}
-function completeStudent(durationSeconds, fastFinish){
-  apiPost('complete', {
-    studentKey:S.studentKey, lessonId:CONFIG.lessonId, studentId:S.studentId, hoTen:S.hoTen, lop:S.lop,
-    score:S.score, xp:S.xp, durationSeconds, fastFinish,
-    progress: progressPercent(), mindmapJSON: JSON.stringify(S.mindmap)
-  });
-  go('complete');
-}
-function renderComplete(){
-  app.innerHTML = `
-  <div class="card" style="text-align:center;background:linear-gradient(180deg,#0f2440,#15325a);color:#fff">
-    <h1>🎉 Hoàn thành Bài 9!</h1>
-    <p>Điểm: <strong>${S.score}</strong> · XP: <strong>${S.xp}</strong> ⭐</p>
-    <p class="small" style="color:#cfe0f5">Thời gian: ${fmtDuration(S.durationSeconds||0)} ${S.fastFinish?'⚡':''}</p>
-  </div>
-  <div class="card">
-    <h3>🧠 Sơ đồ tư duy của em</h3>
-    <div id="finalMindmap"></div>
-  </div>
-  <div class="card">
-    <h3>📚 Tìm hiểu thêm</h3>
-    <div class="link-list">
-      <a href="https://support.microsoft.com/en-us/windows/security/threat-malware-protection/virus-and-threat-protection-in-the-windows-security-app" target="_blank" rel="noopener noreferrer">🔗 Microsoft Support – Virus & threat protection</a>
-      <a href="https://www.microsoft.com/en-us/wdsi" target="_blank" rel="noopener noreferrer">🔗 Microsoft Defender – Security Intelligence</a>
-      <a href="https://www.unicef.org/vietnam/vi/b%C3%A1o-c%C3%A1o/an-to%C3%A0n-tr%E1%BB%B1c-tuy%E1%BA%BFn-cho-tr%E1%BA%BB-em" target="_blank" rel="noopener noreferrer">🔗 UNICEF Việt Nam – An toàn trực tuyến cho trẻ em</a>
-      <a href="https://khonggianmang.vn" target="_blank" rel="noopener noreferrer">🔗 Cổng thông tin an toàn không gian mạng quốc gia (NCSC)</a>
-    </div>
-    <footer class="note">Giao diện Windows Security hiện tại có thể khác hình trong SGK do phiên bản Windows thay đổi.</footer>
-  </div>
-  <button class="btn btn-outline" onclick="go('p5')">◀ Xem lại Trang 5</button>
-  `;
-  const positions = [[150,40],[280,150],[20,150]];
-  let svg = `<svg viewBox="0 0 300 220" style="width:100%;max-width:340px;background:#f8fbff;border-radius:12px;border:1px solid var(--border)"><circle cx="150" cy="150" r="34" fill="#0f2440"/><text x="150" y="146" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">AN TOÀN</text><text x="150" y="158" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">MẠNG</text>`;
-  Object.keys(S.mindmap).forEach((b,i)=>{
-    const [x,y]=positions[i];
-    svg += `<line x1="150" y1="150" x2="${x}" y2="${y}" stroke="#22d3ee" stroke-width="2"/><circle cx="${x}" cy="${y}" r="26" fill="#eafcff" stroke="#0891b2" stroke-width="2"/><text x="${x}" y="${y+3}" text-anchor="middle" font-size="8" fill="#0f2440" font-weight="700">${b}</text>`;
-  });
-  svg += `</svg>`;
-  document.getElementById('finalMindmap').innerHTML = svg;
-}
-
-/* =========================================================
-   TEACHER MODE
-========================================================= */
-document.getElementById('teacherBtn').addEventListener('click', openTeacherLogin);
-function openTeacherLogin(){
-  const overlay = document.createElement('div'); overlay.className='modal-overlay'; overlay.id='teacherOverlay';
-  overlay.innerHTML = `<div class="modal-box">
-    <h3>👨‍🏫 Teacher Mode</h3>
-    <label for="teacherPass">Nhập mã giáo viên</label>
-    <input type="text" id="teacherPass" placeholder="Mã giáo viên">
-    ${DEMO_MODE ? '<p class="small" style="color:var(--warn-dark)">Demo Mode: mã kiểm thử phía trình duyệt không phải cơ chế bảo mật.</p>' : ''}
-    <div id="teacherLoginErr" class="feedback hint hidden"></div>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn btn-outline" id="teacherCancel">Hủy</button>
-      <button class="btn btn-primary" id="teacherSubmit">Đăng nhập</button>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  document.getElementById('teacherCancel').onclick = ()=>overlay.remove();
-  document.getElementById('teacherSubmit').onclick = async ()=>{
-    const pass = document.getElementById('teacherPass').value.trim();
-    const errEl = document.getElementById('teacherLoginErr');
-    if(DEMO_MODE){
-      if(pass===CONFIG.teacherCode){ overlay.remove(); openTeacherDashboard(buildDemoTeacherData()); }
-      else { errEl.classList.remove('hidden'); errEl.textContent = '❌ Sai mã giáo viên.'; }
-      return;
-    }
-    try{
-      const data = await apiGet({action:'teacherData', lessonId:CONFIG.lessonId, password:pass, schoolYear:CONFIG.schoolYear});
-      if(data && data.ok){ overlay.remove(); openTeacherDashboard(data); }
-      else { errEl.classList.remove('hidden'); errEl.textContent = '❌ Sai mã giáo viên hoặc chưa kết nối được máy chủ.'; }
-    }catch(e){ errEl.classList.remove('hidden'); errEl.textContent = '❌ Không thể kết nối máy chủ. Kiểm tra CONFIG.googleScriptUrl.'; }
-  };
-}
-function buildDemoTeacherData(){
-  const students = DEMO_STUDENTS.map(d=>{
-    const key = `${CONFIG.lessonId}_${CONFIG.schoolYear}_${d.StudentID}`;
-    const local = loadLocal(key);
-    const reqDone = local ? Object.keys(local.completedActivities||{}).filter(a=>REQUIRED_ACTIVITIES.includes(a)).length : 0;
-    return {
-      StudentID:d.StudentID, HoTen:d.HoTen, Lop:d.Lop,
-      Progress: local? Math.round(100*reqDone/REQUIRED_ACTIVITIES.length) : 0,
-      Score: local? local.score : 0, XP: local? local.xp : 0,
-      DurationSeconds: local? (local.durationSeconds||0) : 0,
-      FastFinish: local? !!local.fastFinish : false,
-      Completed: local? !!local.completeTime : false,
-      Understanding: local && local.exitTicket ? local.exitTicket.understanding : null,
-      ExitTicket: local? local.exitTicket : null,
-      Mindmap: local? local.mindmap : null
-    };
-  });
-  return {ok:true, demo:true, students};
-}
-function openTeacherDashboard(data){
-  const students = data.students || [];
-  const total = students.length;
-  const completed = students.filter(s=>s.Completed).length;
-  const inProgress = total-completed;
-  const avgScore = total? Math.round(students.reduce((a,s)=>a+(s.Score||0),0)/total) : 0;
-  const avgDuration = total? Math.round(students.reduce((a,s)=>a+(s.DurationSeconds||0),0)/total) : 0;
-  const fastCount = students.filter(s=>s.FastFinish).length;
-  const understandVals = students.map(s=>s.Understanding).filter(Boolean);
-  const avgUnderstand = understandVals.length ? (understandVals.reduce((a,v)=>a+Number(v),0)/understandVals.length).toFixed(1) : '—';
-  const overlay = document.createElement('div'); overlay.className='modal-overlay';
-  overlay.innerHTML = `<div class="modal-box wide">
-    <h2>📊 Dashboard — ${CONFIG.lessonName}</h2>
-    ${data.demo ? '<p class="small" style="color:var(--warn-dark)">Demo Mode: chỉ hiển thị dữ liệu đã lưu trên thiết bị này.</p>':''}
-    <div class="grid3" style="margin:14px 0">
-      <div class="stat-card"><div class="num">${total}</div><div class="lbl">👥 Tổng học sinh</div></div>
-      <div class="stat-card"><div class="num">${completed}</div><div class="lbl">✅ Đã hoàn thành</div></div>
-      <div class="stat-card"><div class="num">${inProgress}</div><div class="lbl">⏳ Đang thực hiện</div></div>
-      <div class="stat-card"><div class="num">${avgScore}</div><div class="lbl">📊 Điểm trung bình</div></div>
-      <div class="stat-card"><div class="num">${Math.round(avgDuration/60)}p</div><div class="lbl">🕒 Thời gian trung bình</div></div>
-      <div class="stat-card"><div class="num">${fastCount}</div><div class="lbl">⚡ Hoàn thành &lt;10 phút</div></div>
-      <div class="stat-card"><div class="num">${avgUnderstand}</div><div class="lbl">🧠 Mức hiểu trung bình</div></div>
-      <div class="stat-card"><div class="num" style="font-size:14px">Windows Security</div><div class="lbl">❓ Phần khó nhất (mẫu)</div></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-      <select id="tfLop"><option value="">Tất cả lớp</option>${[...new Set(students.map(s=>s.Lop))].map(l=>`<option value="${l}">${l}</option>`).join('')}</select>
-      <select id="tfStatus"><option value="">Tất cả</option><option value="done">Đã hoàn thành</option><option value="pending">Chưa hoàn thành</option></select>
-      <input type="text" id="tfSearch" placeholder="Tìm tên...">
-    </div>
-    <div class="table-wrap"><table id="teacherTable">
-      <thead><tr><th>STT</th><th>Họ tên</th><th>Lớp</th><th>Tiến độ</th><th>Điểm</th><th>XP</th><th>Thời gian</th><th>Hiểu bài</th><th>Fast</th><th>Exit</th><th>Chi tiết</th></tr></thead>
-      <tbody></tbody>
-    </table></div>
-    <div style="margin-top:14px;text-align:right"><button class="btn btn-outline" id="teacherClose">Đóng</button></div>
-  </div>`;
-  document.body.appendChild(overlay);
-  document.getElementById('teacherClose').onclick = ()=>overlay.remove();
-  function renderTable(){
-    const lop = document.getElementById('tfLop').value;
-    const status = document.getElementById('tfStatus').value;
-    const q = document.getElementById('tfSearch').value.toLowerCase();
-    const rows = students.filter(s=>{
-      if(lop && s.Lop!==lop) return false;
-      if(status==='done' && !s.Completed) return false;
-      if(status==='pending' && s.Completed) return false;
-      if(q && !(s.HoTen||'').toLowerCase().includes(q)) return false;
-      return true;
-    });
-    document.querySelector('#teacherTable tbody').innerHTML = rows.map((s,i)=>`
-      <tr>
-        <td>${i+1}</td><td>${s.HoTen}</td><td>${s.Lop}</td><td>${s.Progress||0}%</td>
-        <td>${s.Score||0}</td><td>${s.XP||0}</td><td>${Math.round((s.DurationSeconds||0)/60)}p</td>
-        <td>${s.Understanding||'—'}</td><td>${s.FastFinish?'⚡':''}</td>
-        <td>${s.ExitTicket?'✅':'—'}</td>
-        <td><button class="btn btn-outline" style="min-height:32px;padding:4px 10px;font-size:12px" data-detail="${i}">Xem</button></td>
-      </tr>`).join('');
-    document.querySelectorAll('[data-detail]').forEach(b=>{
-      b.onclick = ()=>showStudentDetail(rows[b.dataset.detail]);
-    });
-  }
-  document.getElementById('tfLop').onchange = renderTable;
-  document.getElementById('tfStatus').onchange = renderTable;
-  document.getElementById('tfSearch').oninput = renderTable;
-  renderTable();
-}
-function showStudentDetail(s){
-  const overlay = document.createElement('div'); overlay.className='modal-overlay';
-  const mm = s.Mindmap || {};
-  overlay.innerHTML = `<div class="modal-box">
-    <h3>${s.HoTen} — ${s.Lop}</h3>
-    <p class="small">Tiến độ: ${s.Progress||0}% · Điểm: ${s.Score||0} · XP: ${s.XP||0} ${s.FastFinish?'⚡ Hoàn thành nhanh':''}</p>
-    <h4>Sơ đồ tư duy</h4>
-    ${Object.keys(mm).length? Object.keys(mm).map(b=>`<p><strong>${b}:</strong> ${(mm[b]||[]).join(', ')||'—'}</p>`).join('') : '<p class="small">Chưa có dữ liệu.</p>'}
-    ${s.ExitTicket ? `<h4>Exit Ticket</h4>
-      <p><strong>Hiểu rõ nhất:</strong> ${s.ExitTicket.learned||'—'}</p>
-      <p><strong>Khó nhất:</strong> ${(s.ExitTicket.difficultPart||[]).join(', ')||'—'}</p>
-      <p><strong>Vận dụng:</strong> ${s.ExitTicket.application||'—'}</p>
-      <p><strong>Câu hỏi thêm:</strong> ${s.ExitTicket.question||'—'}</p>` : ''}
-    <div style="text-align:right;margin-top:10px"><button class="btn btn-outline" id="detailClose">Đóng</button></div>
-  </div>`;
-  document.body.appendChild(overlay);
-  document.getElementById('detailClose').onclick = ()=>overlay.remove();
-}
-
-/* =========================================================
-   INIT
-========================================================= */
-updateSyncBadge();
-render();
-</script>
-</body>
-</html>
+badge();login();sync();
+</script></body></html>
