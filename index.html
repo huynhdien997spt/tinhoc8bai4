@@ -36,7 +36,8 @@ select{padding:8px;border:1px solid var(--line);border-radius:8px;background:var
 .badge{position:fixed;right:8px;bottom:8px;background:var(--amber);color:#10222f;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:600;z-index:9}
 table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}.tw{overflow-x:auto}
 .stats{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.stats div{flex:1 1 130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
-.stars button{font-size:20px;border:0;background:transparent;cursor:pointer;opacity:.4}.stars button.on{opacity:1}
+.stars button{font-size:20px;border:0;background:transparent;cursor:pointer;opacity:.4}
+.pwrap{position:relative;max-width:280px;margin:8px auto}.pwrap input{width:100%;padding:9px 38px 9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card)}.pwrap button{position:absolute;right:4px;top:4px;bottom:4px;border:0;background:transparent;cursor:pointer;font-size:16px;padding:0 8px}.stars button.on{opacity:1}
 label.ck{display:block;margin:4px 0}
 </style></head><body>
 <div id="app"></div><div class="badge" id="badge" hidden></div>
@@ -47,7 +48,7 @@ const CONFIG = {
     lessonId: "TIN8_BAI4",
     lessonName: "Bài 4. Đạo đức và văn hoá trong sử dụng công nghệ kĩ thuật số",
     schoolYear: "2026-2027",
-    teacherCode: "GV2026",
+    teacherCode: "GV2026", 
     googleScriptUrl: "https://script.google.com/macros/s/AKfycbyDGIb41hEUovma4s_uJsag2vcnIC5EVVF7LMmmG4mkuGq3PPnNn5bh3dfK-qKZbXU/exec"
 };
 /* ================= NỘI DUNG ================= */
@@ -156,10 +157,16 @@ function exit(it){const e=st.exit,d=(A(it.id)||{}).d,u=e.u||0;
 function ex(k,v){st.exit[k]=v;clearTimeout(ex.t);ex.t=setTimeout(()=>save('B4_EXIT'),500)}
 async function submitExit(){const e=st.exit;if(!(e.l||'').trim()||!(e.ap||'').trim()||!e.u){alert("Em hãy trả lời câu 1, 2 và chọn mức độ hiểu bài.");return}e.sub=Date.now();st.ans.B4_EXIT={d:1};save('B4_EXIT');if(!DEMO)try{await api('submitExitTicket',{state:st})}catch(x){}render()}
 /* ================= TEACHER MODE ================= */
-async function teacher(){const code=prompt("Nhập mã giáo viên:");if(!code)return;let rows;
+function teacher(){
+ $('#app').innerHTML=`<div class="login card"><div style="font-size:34px">👨‍🏫</div><h1>Teacher Mode</h1><p>Nhập mã giáo viên để xem thống kê lớp học.</p>
+ <div class="pwrap"><input id="tcode" type="password" placeholder="Mã giáo viên" onkeydown="if(event.key==='Enter')teacherAuth()"><button type="button" aria-label="Hiện/ẩn mã" onclick="togglePw()">👁</button></div>
+ <p><button class="btn" onclick="teacherAuth()">Xác nhận</button> <button class="btn alt" onclick="login()">← Quay lại</button></p></div>`;
+ $('#tcode').focus()}
+function togglePw(){const i=$('#tcode');i.type=i.type==='password'?'text':'password'}
+async function teacherAuth(){const code=$('#tcode').value;if(!code)return;let rows;
  if(DEMO){if(code!==CONFIG.teacherCode){alert("Sai mã.");return}rows=DEMO_ROSTER.map(r=>{const s=lget(KEY(r.StudentID))||{};return{name:r.name,sid:r.StudentID,cls:r.cls,year:r.year,pct:s.pct||0,sec:s.sec===undefined?'':SECS[s.sec].n,doneN:Object.values(s.ans||{}).filter(a=>a.d).length,score:s.score||'',u:(s.exit||{}).u||'',un:(s.exit||{}).un||'',upd:s.upd?new Date(s.upd).toLocaleString('vi'):''}})}
  else try{rows=(await api('getTeacherDashboard',{code,lessonId:CONFIG.lessonId})).rows}catch(e){alert("Không tải được: "+e.message);return}
- T={rows,q:'',c:'',y:'',s:''};tview()}
+ T={rows,q:'',c:'',y:'',s:'',showAns:false};tview()}
 function tview(){const R=T.rows,f=R.filter(r=>(!T.q||r.name.toLowerCase().includes(T.q.toLowerCase()))&&(!T.c||r.cls===T.c)&&(!T.y||r.year===T.y)&&(!T.s||(T.s==='0'?!r.pct:T.s==='1'?r.pct>0&&r.pct<100:r.pct>=100))),avg=(a)=>a.length?(a.reduce((x,y)=>x+ +y,0)/a.length).toFixed(1):'–',op=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
  $('#app').innerHTML=`<header><b>👨‍🏫 Teacher Mode</b><button class="btn alt" onclick="content(0)">📖 Xem nội dung bài học</button><button class="btn alt" onclick="T=null;login()">← Thoát</button></header><main><div class="stats"><div>👥 Tổng<br><b>${f.length}</b></div><div>▶ Đang học<br><b>${f.filter(r=>r.pct>0&&r.pct<100).length}</b></div><div>✅ Hoàn thành<br><b>${f.filter(r=>r.pct>=100).length}</b></div><div>📊 Điểm TB<br><b>${avg(f.filter(r=>r.score!=='').map(r=>r.score))}</b></div><div>⭐ Hiểu TB<br><b>${avg(f.filter(r=>r.u).map(r=>r.u))}</b></div></div>
  <input id="tq" placeholder="🔍 Tìm học sinh" value="${esc(T.q)}" style="padding:8px;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--card)">
@@ -168,32 +175,40 @@ function tview(){const R=T.rows,f=R.filter(r=>(!T.q||r.name.toLowerCase().includ
  <div class="tw"><table><tr><th>Họ tên</th><th>Mã</th><th>Lớp</th><th>Năm</th><th>%</th><th>Phần</th><th>HĐ xong</th><th>Điểm</th><th>Hiểu</th><th>Chưa hiểu</th><th>Cập nhật</th></tr>${f.map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(r.sid)}</td><td>${esc(r.cls)}</td><td>${esc(r.year)}</td><td>${r.pct}%</td><td>${esc(r.sec)}</td><td>${r.doneN}</td><td>${esc(r.score)}</td><td>${esc(r.u)}</td><td>${esc(r.un)}</td><td>${esc(r.upd)}</td></tr>`).join('')}</table></div></main>`;
  $('#tq').oninput=e=>{T.q=e.target.value;const p=e.target.selectionStart;tview();$('#tq').focus();$('#tq').setSelectionRange(p,p)};$('#tc').onchange=e=>{T.c=e.target.value;tview()};$('#ty').onchange=e=>{T.y=e.target.value;tview()};$('#ts').onchange=e=>{T.s=e.target.value;tview()}}
 /* ================= XEM NỘI DUNG BÀI (Teacher) ================= */
-function contentItem(it){
+function contentItem(it,showAns){
  if(it.t==='c'){
   let h=`<div class="card"><p class="q">${it.q||''}</p>${it.pre||''}<div class="opts">${it.o.map((o,i)=>{
-    const isKey = it.k===-1 ? false : i===it.k;
+    const isKey = showAns && it.k!==-1 && i===it.k;
     return `<button class="opt${isKey?' sel':''}" disabled>${o}${isKey?' ✅':''}</button>`;
   }).join('')}</div>`;
-  if(it.f){h+=`<div class="fb ok"><b>Phản hồi theo lựa chọn:</b><br>${it.f.map((t,i)=>`${it.o[i]}: ${t}`).join('<br>')}</div>`}
-  else{h+=`<div class="fb ok">Đúng: ${it.fb}</div><div class="fb">Chưa đúng: 💡 ${it.h}</div>`}
-  if(it.tail)h+=`<div class="fb"><small>${it.tail}</small></div>`;
-  if(it.sh)h+=`<div class="fb"><small>Lá chắn liên quan: ${it.sh}</small></div>`;
-  if(it.after)h+=`<div class="fb ok"><b>Câu dẫn dắt sau hoạt động:</b> ${it.after}</div>`;
+  if(showAns){
+   if(it.f){h+=`<div class="fb ok"><b>Phản hồi theo lựa chọn:</b><br>${it.f.map((t,i)=>`${it.o[i]}: ${t}`).join('<br>')}</div>`}
+   else{h+=`<div class="fb ok">Đúng: ${it.fb}</div><div class="fb">Chưa đúng: 💡 ${it.h}</div>`}
+   if(it.tail)h+=`<div class="fb"><small>${it.tail}</small></div>`;
+   if(it.sh)h+=`<div class="fb"><small>Lá chắn liên quan: ${it.sh}</small></div>`;
+   if(it.after)h+=`<div class="fb ok"><b>Câu dẫn dắt sau hoạt động:</b> ${it.after}</div>`;
+  } else {
+   h+=`<p><small>🔒 Đáp án đang ẩn. Bật "Hiện đáp án" ở trên để xem.</small></p>`;
+  }
   if(it.why)h+=`<p><small>* Học sinh viết thêm 1–2 câu giải thích sau khi chọn.</small></p>`;
   return h+'</div>';
  }
  if(it.t==='fix'){
-  return `<div class="card"><p class="q">🛠 Sửa một sản phẩm số chưa tốt</p><p>Các điểm có vấn đề học sinh cần tìm (5):</p>${FIX.map(t=>`<div class="hot f">${t}</div>`).join('')}<p>Các cách sửa đúng (chọn đủ 5):</p>${FIXES.map(t=>`<div class="hot f">✓ ${t}</div>`).join('')}</div>`;
+  let h=`<div class="card"><p class="q">🛠 Sửa một sản phẩm số chưa tốt</p><p>Các điểm có vấn đề học sinh cần tìm (5):</p>${FIX.map(t=>`<div class="hot f">${t}</div>`).join('')}`;
+  if(showAns)h+=`<p>Các cách sửa đúng (chọn đủ 5):</p>${FIXES.map(t=>`<div class="hot f">✓ ${t}</div>`).join('')}`;
+  else h+=`<p><small>🔒 Danh sách cách sửa đúng đang ẩn. Bật "Hiện đáp án" để xem.</small></p>`;
+  return h+'</div>';
  }
  if(it.t==='exit'){
   return `<div class="card"><p class="q">🎟 Exit ticket – nội dung học sinh trả lời</p><ol><li>Em học được gì? (textarea)</li><li>Em chuẩn bị đăng một sản phẩm số có sử dụng ảnh hoặc thông tin của người khác. Trước khi đăng, em sẽ làm những gì? (textarea)</li><li>Mức độ hiểu bài: chọn 1–5 sao.</li><li>Điều em vẫn chưa hiểu (textarea).</li></ol><p class="q">🧠 Hướng dẫn vẽ sơ đồ tư duy ra giấy</p><ol><li>Chủ đề trung tâm: "ĐẠO ĐỨC &amp; VĂN HOÁ TRONG SỬ DỤNG CÔNG NGHỆ SỐ".</li><li>3–5 nhánh chính: biểu hiện vi phạm; cách tránh vi phạm; trung thực; sản phẩm số; sử dụng có trách nhiệm.</li><li>Mỗi nhánh dùng từ khoá ngắn, có nhánh con.</li><li>Thêm hình ảnh/icon.</li><li>Dùng màu phân biệt nhánh.</li></ol><p><small>Học sinh tự xác nhận đã hoàn thành, không nộp ảnh.</small></p></div>`;
  }
  return '';
 }
+function toggleAns(){T.showAns=!T.showAns;content(T.ci||0)}
 function content(i){
- const S=SECS[i];
- let h=`<header><b>📖 Nội dung: ${esc(CONFIG.lessonName)}</b><button class="btn alt" onclick="tview()">← Bảng thống kê</button><button class="btn alt" onclick="T=null;login()">Thoát</button></header><main><nav>${SECS.map((s,k)=>`<button class="${k===i?'on':''}" onclick="content(${k})">Phần ${k+1}<small>${esc(s.n)} · ~${s.m}′</small></button>`).join('')}</nav><h2>${i+1}. ${esc(S.n)}</h2>${S.pre||''}`;
- S.items.forEach(it=>h+=contentItem(it));
+ T.ci=i;const S=SECS[i],sa=!!T.showAns;
+ let h=`<header><b>📖 Nội dung: ${esc(CONFIG.lessonName)}</b><button class="btn ${sa?'':'alt'}" onclick="toggleAns()">${sa?'🔓 Đang hiện đáp án':'👁 Hiện đáp án'}</button><button class="btn alt" onclick="tview()">← Bảng thống kê</button><button class="btn alt" onclick="T=null;login()">Thoát</button></header><main><nav>${SECS.map((s,k)=>`<button class="${k===i?'on':''}" onclick="content(${k})">Phần ${k+1}<small>${esc(s.n)} · ~${s.m}′</small></button>`).join('')}</nav><h2>${i+1}. ${esc(S.n)}</h2>${S.pre||''}`;
+ S.items.forEach(it=>h+=contentItem(it,sa));
  h+=`<p>${i>0?`<button class="btn alt" onclick="content(${i-1})">← Phần trước</button> `:''}${i<SECS.length-1?`<button class="btn" onclick="content(${i+1})">Phần sau →</button>`:''}</p></main>`;
  $('#app').innerHTML=h;window.scrollTo(0,0);
 }
